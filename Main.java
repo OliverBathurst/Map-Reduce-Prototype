@@ -9,6 +9,7 @@ public class Main {
             newConfig.setTitle("Testing");
             newConfig.addInputPath(args[0]);
             newConfig.addOutputPath(args[1]);
+            newConfig.setRegex(",");
             Job newJob = new Job(newConfig);
             newJob.runJob();
         }else{
@@ -16,19 +17,19 @@ public class Main {
                     "java -jar mapReduce.jar inputfile outputfile");
         }
     }
-    class reducer extends Reducer{
+    public class reducer extends Reducer{
         void reduce() {
 
 
         }
     }
-    class mapper extends Mapper{
+    public class mapper extends Mapper{
         void map() {
 
 
         }
     }
-    class comparator{
+    public class comparator{
 
 
     }
