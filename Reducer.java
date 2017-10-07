@@ -1,0 +1,7 @@
+class Reducer {
+
+    void reduce(){
+
+
+    }
+}
