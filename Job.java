@@ -1,5 +1,5 @@
 import java.io.*;
-import java.lang.reflect.Method;
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -11,7 +11,7 @@ class Job {
         config = conf;
     }
 
-    private void readIn(){
+    private void read(){
         try {
             Scanner scanner = new Scanner(new File(config.getInputPath()));
             readRow = new ArrayList<>();
@@ -23,30 +23,31 @@ class Job {
             }
             scanner.close();
         }catch(Exception e){
-            System.out.println("EXCEPTION: " + e.getMessage());
+            //System.out.println("EXCEPTION: " + e.getMessage());
+            e.printStackTrace();
         }
     }
-    void parse(){
+    @SuppressWarnings("all")
+    private void parse(){
         try {
             if (config.getMapper() != null) {
                 String regex = (config.getRegex() != null ? config.getRegex() : ","); //default to comma if no regex provided
-                Class<?> mapClass = config.getMapper(); //get class set by the config
-                Method method = mapClass.getMethod("map"); //get the required map method
+                Constructor<?> cons = ((Class) config.getMapper()).getConstructor(String[].class);
                 for (String s : readRow) { //for each row/string in the list
-                    method.invoke(s.split(regex));//split using regex to get string array and invoke the map method with that parameter
+                    cons.newInstance(new Object[]{s.split(regex)});//split using regex to get string array and invoke the map method with that parameter
                 }
             }else{
-                System.out.println("Map method 'map' not defined");
+                System.out.println("Map method 'map' not defined");//no map method found
             }
         }catch(Exception e){
-            System.out.println("Exception: " + e.getCause() + "\n"
-                    + e.getMessage());
+            e.printStackTrace();
+            //System.out.println("Exception: " + e.getCause() + "\n"
+                   // + e.getMessage());
         }
     }
     void runJob(){
-        readIn();
-        //parse();
-
+        read();
+        parse();
     }
     void output(){
         try {

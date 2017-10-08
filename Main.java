@@ -3,6 +3,7 @@ public class Main {
     public static void main(String[] args) {
         if(args.length == 2) {
             Config newConfig = new Config();
+            newConfig.setMain(Main.class);
             newConfig.setMapper(mapper.class);
             newConfig.setReducer(reducer.class);
             newConfig.setComparator(comparator.class);
@@ -17,20 +18,22 @@ public class Main {
                     "java -jar mapReduce.jar inputfile outputfile");
         }
     }
-    public class reducer extends Reducer{
-        void reduce() {
+    private class reducer extends Reducer{
+        public void reduce() {
 
 
         }
     }
-    public class mapper extends Mapper{
-        void map() {
-
-
+    public static class mapper{
+        public mapper(){}
+        public mapper(String[] arguments) {
+            System.out.println(arguments[0]);
         }
     }
-    public class comparator{
+
+    private class comparator{
 
 
     }
+
 }
