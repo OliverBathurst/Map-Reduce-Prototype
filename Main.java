@@ -4,8 +4,8 @@ public class Main {
         if(args.length == 2) {
             Config newConfig = new Config();
             newConfig.setMain(Main.class);
-            newConfig.setMapper(mapper.class);
-            newConfig.setReducer(reducer.class);
+            newConfig.setMapper(map.class);
+            newConfig.setReducer(reduce.class);
             newConfig.setComparator(comparator.class);
             newConfig.setTitle("Testing");
             newConfig.addInputPath(args[0]);
@@ -18,22 +18,15 @@ public class Main {
                     "java -jar mapReduce.jar inputfile outputfile");
         }
     }
-    private class reducer extends Reducer{
-        public void reduce() {
-
-
+    public static class reduce extends Reducer{
+        public reduce(String[] arguments) { }
+    }
+    public static class map extends Mapper{
+        public map(String[] arguments) {
+            for(String str: arguments){
+                System.out.println(str);
+            }
         }
     }
-    public static class mapper{
-        public mapper(){}
-        public mapper(String[] arguments) {
-            System.out.println(arguments[0]);
-        }
-    }
-
-    private class comparator{
-
-
-    }
-
+    public static class comparator{}
 }

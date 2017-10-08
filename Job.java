@@ -22,37 +22,55 @@ class Job {
                 System.out.println("Read: " + line);
             }
             scanner.close();
-        }catch(Exception e){
-            //System.out.println("EXCEPTION: " + e.getMessage());
-            e.printStackTrace();
+        }catch(FileNotFoundException e){
+            System.out.println("EXCEPTION: File not Found Exception\n"
+                    + e.getMessage());
         }
     }
-    @SuppressWarnings("all")
+    @SuppressWarnings("unchecked")
     private void parse(){
         try {
             if (config.getMapper() != null) {
                 String regex = (config.getRegex() != null ? config.getRegex() : ","); //default to comma if no regex provided
-                Constructor<?> cons = ((Class) config.getMapper()).getConstructor(String[].class);
+                Constructor<?> cons = config.getMapper().getConstructor(String[].class);//(Class)
                 for (String s : readRow) { //for each row/string in the list
                     cons.newInstance(new Object[]{s.split(regex)});//split using regex to get string array and invoke the map method with that parameter
                 }
             }else{
-                System.out.println("Map method 'map' not defined");//no map method found
+                System.out.println("Mapper method 'mapper' not defined\n" +
+                        "use config.setMapper(class)");//no map method found
             }
-        }catch(Exception e){
-            e.printStackTrace();
-            //System.out.println("Exception: " + e.getCause() + "\n"
-                   // + e.getMessage());
+        }catch(NoSuchMethodException e){ //catch exception to give feedback
+            System.out.println("EXCEPTION: No Such Method Exception\n"
+                            + e.getMessage() + "\npublic mapper(String[] args) constructor not found in mapper class");
+        }catch(Exception e) {
+            e.printStackTrace(); //print other errors
         }
     }
     void runJob(){
         read();
         parse();
+        //reduce();
+        //output();
     }
-    void output(){
+    @SuppressWarnings("unchecked")
+    private void reduce(){
+        try{
+            if(config.getReducer() !=null){
+                Constructor<?> cons = config.getReducer().getConstructor(String[].class);
+            }else{
+                System.out.println("Reducer constructor 'reduce' not defined\n" +
+                        "use config.setReducer(class)");//no reduce method found
+            }
+        }catch(NoSuchMethodException e){
+            System.out.println("EXCEPTION: No Such Method Exception\n"
+                    + e.getMessage() + "\npublic reducer(String[] args) constructor not found in reducer class");
+        }
+    }
+    private void output(){
         try {
-            FileWriter fw = new FileWriter(new File(config.getOutputPath()));
-
+            //FileWriter fw = new FileWriter(new File(config.getOutputPath()));
+            System.out.println("Completed Job: " + config.getJobName());
         }catch(Exception e){
             System.out.println("Cause: " + e.getCause() + " Message: " + e.getMessage());
         }
