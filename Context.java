@@ -1,7 +1,7 @@
 import java.util.HashMap;
 
 public class Context {
-    private HashMap<Object, Object> mapped;
+    private final HashMap<Object, Object> mapped;
 
     Context(){
         mapped = new HashMap<>();

@@ -1,7 +1,7 @@
 
-class Mapper{
+class Mapper {
 
-    public void Mapper(){}
+    Mapper(){}
 
    // void map(Object key, Object value) {
     //    mapped.put(key,value);

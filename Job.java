@@ -3,7 +3,7 @@ import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-class Job extends Mapper{
+class Job {
     private Config config;
     private ArrayList<String> readRow;
 
@@ -35,10 +35,12 @@ class Job extends Mapper{
             if(config.getContext() != null) {
                 if (config.getMapper() != null) {
                     String regex = (config.getRegex() != null ? config.getRegex() : ","); //default to comma if no regex provided
-                    Constructor<?> cons = config.getMapper().getConstructor(String[].class);//(Class)
+                    Constructor cons = config.getMapper().getConstructor(String[].class, Context.class);//  (Class), Context.class
+
                     for (String s : readRow) { //for each row/string in the list
-                        cons.newInstance(new Object[]{s.split(regex)});//split using regex to get string array and invoke the map method with that parameter
+                        cons.newInstance(s.split(regex), config.getContext());//split using regex to get string array and invoke the map method with that parameter , config.getContext()
                     }
+
                 } else {
                     System.out.println("Mapper method 'mapper' not defined\n" +
                             "use config.setMapper(class);");//no map method found
@@ -64,7 +66,7 @@ class Job extends Mapper{
     private void reduce(){
         try{
             if(config.getReducer() != null){
-                Constructor<?> cons = config.getReducer().getConstructor(String[].class);
+                Constructor cons = config.getReducer().getConstructor(String[].class);
             }else{
                 System.out.println("Reducer method 'reduce' not defined\n" +
                         "use config.setReducer(class);");//no reduce method found

@@ -1,4 +1,4 @@
-public class Main {
+class Main {
 
     public static void main(String[] args) {
         if(args.length == 2) {
@@ -21,14 +21,14 @@ public class Main {
         }
     }
     public static class reduce extends Reducer{
-        public reduce(String[] arguments) { }
+        public reduce(String[] arguments) {}
     }
     public static class map extends Mapper{
-        public map(String[] arguments) {
+        public map(String[] arguments, Context context) {
             for(String str: arguments){
                 System.out.println(str);
             }
-
+            context.write(arguments[0], arguments[1]);
         }
     }
     public static class comparator{}
