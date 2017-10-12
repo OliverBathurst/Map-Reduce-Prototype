@@ -1,11 +1,9 @@
 
 class Config {
-    private Class reduce, map, comparator, main;
+    private Class reduce, map, comparator;
     private String jobName, input, output, regex;
+    private Context c;
 
-    void setMain(Class mainClass){
-        main = mainClass;
-    }
     void setReducer(Class reducer){
         reduce = reducer;
     }
@@ -27,6 +25,12 @@ class Config {
     void setRegex(String reg){
         regex = reg;
     }
+    void setContext(Context context){
+        c = context;
+    }
+    Context getContext(){
+        return c;
+    }
     String getRegex(){
         return regex;
     }
@@ -47,8 +51,5 @@ class Config {
     }
     Class getComparator(){
         return comparator;
-    }
-    Class getMain(){
-        return main;
     }
 }
