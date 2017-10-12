@@ -10,7 +10,6 @@ class Main {
             newConfig.setTitle("Testing");
             newConfig.addInputPath(args[0]);
             newConfig.addOutputPath(args[1]);
-            newConfig.setRegex(",");
 
             Job newJob = new Job();
             newJob.setJobConfig(newConfig);
@@ -24,7 +23,7 @@ class Main {
         public reduce(String[] arguments) {}
     }
     public static class map extends Mapper{
-        public map(String[] arguments, Context context) {
+        public map(String values, Context context) {
             //for(String str: arguments){
             //    System.out.println(str);
             //}

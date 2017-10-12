@@ -32,13 +32,11 @@ class Job {
         try {
             if(config.getContext() != null) {
                 if (config.getMapper() != null) {
-                    String regex = (config.getRegex() != null ? config.getRegex() : ","); //default to comma if no regex provided
-                    Constructor cons = config.getMapper().getConstructor(String[].class, Context.class);
-
+                    //String regex = (config.getRegex() != null ? config.getRegex() : ","); //default to comma if no regex provided
+                    Constructor cons = config.getMapper().getConstructor(String.class, Context.class);
                     for (String s : readRow) { //for each row/string in the list
-                        cons.newInstance(s.split(regex), config.getContext());//split using regex to get string array and invoke the map method with that parameter , config.getContext()
+                        cons.newInstance(s, config.getContext());//split using regex to get string array and invoke the map method with that parameter , config.getContext()
                     }
-
                 } else {
                     System.out.println("Mapper method 'mapper' not defined\n" +
                             "use config.setMapper(class);");//no map method found
@@ -64,7 +62,7 @@ class Job {
                 + config.getOutputPath() + " in " + (System.currentTimeMillis() - now)
                 + "ms");
     }
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "unused"})
     private void reduce(){
         try{
             if(config.getReducer() != null){

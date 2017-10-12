@@ -1,7 +1,7 @@
 
 class Config {
     private Class reduce, map, comparator;
-    private String jobName, input, output, regex;
+    private String jobName, input, output;
     private Context c;
 
     void setReducer(Class reducer){
@@ -22,17 +22,11 @@ class Config {
     void addOutputPath(String outputPath){
         output = outputPath;
     }
-    void setRegex(String reg){
-        regex = reg;
-    }
     void setContext(Context context){
         c = context;
     }
     Context getContext(){
         return c;
-    }
-    String getRegex(){
-        return regex;
     }
     String getJobName(){
         return jobName;
