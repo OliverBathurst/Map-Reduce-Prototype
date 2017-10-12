@@ -25,10 +25,10 @@ class Main {
     }
     public static class map extends Mapper{
         public map(String[] arguments, Context context) {
-            for(String str: arguments){
-                System.out.println(str);
-            }
-            context.write(arguments[0], arguments[1]);
+            //for(String str: arguments){
+            //    System.out.println(str);
+            //}
+            //context.write(arguments[0], arguments[1]);
         }
     }
     public static class comparator{}

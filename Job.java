@@ -2,6 +2,7 @@ import java.io.*;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
 
 class Job {
     private Config config;
@@ -17,11 +18,8 @@ class Job {
         try {
             readRow = new ArrayList<>();
             Scanner scanner = new Scanner(new File(config.getInputPath()));
-            String line;
             while(scanner.hasNextLine()){
-                line = scanner.nextLine();
-                readRow.add(line);
-                System.out.println("Read: " + line);
+                readRow.add(scanner.nextLine());
             }
             scanner.close();
         }catch(FileNotFoundException e){
@@ -35,7 +33,7 @@ class Job {
             if(config.getContext() != null) {
                 if (config.getMapper() != null) {
                     String regex = (config.getRegex() != null ? config.getRegex() : ","); //default to comma if no regex provided
-                    Constructor cons = config.getMapper().getConstructor(String[].class, Context.class);//  (Class), Context.class
+                    Constructor cons = config.getMapper().getConstructor(String[].class, Context.class);
 
                     for (String s : readRow) { //for each row/string in the list
                         cons.newInstance(s.split(regex), config.getContext());//split using regex to get string array and invoke the map method with that parameter , config.getContext()
@@ -57,10 +55,14 @@ class Job {
         }
     }
     void runJob(){
+        long now = System.currentTimeMillis();
         read();
         map();
         //reduce();
         //output();
+        System.out.println("Completed Job: " + "'" + config.getJobName() + "'" + " to "
+                + config.getOutputPath() + " in " + (System.currentTimeMillis() - now)
+                + "ms");
     }
     @SuppressWarnings("unchecked")
     private void reduce(){
@@ -79,7 +81,6 @@ class Job {
     private void output(){
         try {
             //FileWriter fw = new FileWriter(new File(config.getOutputPath()));
-            System.out.println("Completed Job: " + config.getJobName() + " To: " + config.getOutputPath());
         }catch(Exception e){
             System.out.println("Cause: " + e.getCause() + " Message: " + e.getMessage());
         }
