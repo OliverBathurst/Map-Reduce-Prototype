@@ -2,7 +2,7 @@ import java.io.*;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Scanner;
-import java.util.concurrent.TimeUnit;
+
 /**
  * Created by Oliver Bathurst on 13/10/2017.
  * All Rights Reserved
@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 
 class Job {
     private Config config;
-    private ArrayList<String> readRow;
+    private final ArrayList<String> readRow = new ArrayList<>();
 
     Job(){}
 
@@ -23,7 +23,6 @@ class Job {
 
     private void read(){
         try {
-            readRow = new ArrayList<>();
             Scanner scanner = new Scanner(new File(config.getInputPath()));
             while(scanner.hasNextLine()){
                 readRow.add(scanner.nextLine());

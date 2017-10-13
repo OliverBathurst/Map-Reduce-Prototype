@@ -8,11 +8,9 @@ import java.util.HashMap;
  */
 
 class Context {
-    private final HashMap<Object, Object> mapped;
+    private final HashMap<Object, Object> mapped = new HashMap<>();
 
-    Context(){
-        mapped = new HashMap<>();
-    }
+    Context(){}
     void write(Object a, Object b){
         mapped.put(a,b);
     }

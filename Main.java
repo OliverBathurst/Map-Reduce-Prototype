@@ -32,6 +32,8 @@ class Main {
     }
     public static class map extends Mapper{
         public map(String values, Context context) {
+            String[] arr = values.split(",");
+            context.write(arr[0], arr[1]);
             //for(String str: arguments){
             //    System.out.println(str);
             //}
