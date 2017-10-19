@@ -59,14 +59,10 @@ class Job {
             if(config.getContext() != null) {
                 if (config.getReducer() != null) {
                     Constructor cons = config.getReducer().getConstructor(String.class, Iterable.class, Context.class);
-                    try {
-                        /////TEST
-                        cons.newInstance("key", new ArrayList<Integer>(), config.getContext());
-                        System.out.println("Success");
-                        /////TEST
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                    /////TEST
+                    cons.newInstance("key", new ArrayList<Integer>(), config.getContext());
+                    System.out.println("Success");
+                    /////TEST
                 } else {
                     System.out.println("Reducer method 'reduce' not defined\n" +
                             "use config.setReducer(class);");//no reduce method found
@@ -75,9 +71,8 @@ class Job {
                 System.out.println("Context not defined\n" +
                         "use config.setContext(context);");//no context found
             }
-        }catch(NoSuchMethodException e){
-            System.out.println("EXCEPTION: No Such Method Exception\n"
-                    + e.getMessage() + "\npublic reduce(String[] args) constructor not found in reduce class");
+        }catch(Exception e){
+            System.out.println("Other error: " + e.getMessage() + " cause: " + e.getCause());
         }
     }
     @SuppressWarnings("EmptyTryBlock")
