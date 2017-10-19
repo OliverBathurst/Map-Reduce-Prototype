@@ -25,19 +25,19 @@ class Job {
     @SuppressWarnings("unchecked")
     private void map(){
         try {
-            if(config.getContext() != null) {
+            if(config.getMapperContext() != null) {
                 if (config.getMapper() != null) {
                     Constructor<?> cons = config.getMapper().getConstructor(String.class, Context.class);
                     for (String str : parse.returnMap()) { //for each row/string in the list
-                        cons.newInstance(str, config.getContext());//Invoke the map method with each string (line) and the context
+                        cons.newInstance(str, config.getMapperContext());//Invoke the map method with each string (line) and the context
                     }
                 } else {
                     System.out.println("Mapper method 'mapper' not defined\n" +
                             "use config.setMapper(class);");//no map method found
                 }
             }else{
-                System.out.println("Context not defined\n" +
-                        "use config.setContext(context);");//no context found
+                System.out.println("Mapper context not defined\n" +
+                        "use config.setMapperContext(context);");//no context found
             }
         }catch(Exception e) {
             System.out.println("Other error: " + e.getMessage() + " cause: " + e.getCause());
@@ -56,11 +56,11 @@ class Job {
     @SuppressWarnings({"unchecked", "unused"})
     private void reduce(){
         try{
-            if(config.getContext() != null) {
+            if(config.getReducerContext() != null) {
                 if (config.getReducer() != null) {
                     Constructor cons = config.getReducer().getConstructor(String.class, Iterable.class, Context.class);
                     /////TEST
-                    cons.newInstance("key", new ArrayList<Integer>(), config.getContext());
+                    cons.newInstance("key", new ArrayList<Integer>(), config.getReducerContext());
                     System.out.println("Success");
                     /////TEST
                 } else {
@@ -68,8 +68,8 @@ class Job {
                             "use config.setReducer(class);");//no reduce method found
                 }
             }else{
-                System.out.println("Context not defined\n" +
-                        "use config.setContext(context);");//no context found
+                System.out.println("Reducer context not defined\n" +
+                        "use config.setReducerContext(context);");//no context found
             }
         }catch(Exception e){
             System.out.println("Other error: " + e.getMessage() + " cause: " + e.getCause());

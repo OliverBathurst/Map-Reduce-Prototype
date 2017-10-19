@@ -9,7 +9,7 @@
 class Config {
     private Class reduce, map, comparator;
     private String jobName, input, output;
-    private Context c;
+    private Context contextMapper, contextReducer;
 
     void setReducer(Class reducer){
         reduce = reducer;
@@ -29,11 +29,17 @@ class Config {
     void addOutputPath(String outputPath){
         output = outputPath;
     }
-    void setContext(Context context){
-        c = context;
+    void setReducerContext(Context context){
+        contextReducer = context;
     }
-    Context getContext(){
-        return c;
+    void setMapperContext(Context context){
+        contextMapper = context;
+    }
+    Context getMapperContext(){
+        return contextMapper;
+    }
+    Context getReducerContext(){
+        return contextReducer;
     }
     String getJobName(){
         return jobName;

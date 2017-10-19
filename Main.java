@@ -14,7 +14,8 @@ class Main {
             newConfig.setMapper(map.class);
             newConfig.setReducer(reduce.class);
             //newConfig.setComparator(comparator.class);
-            newConfig.setContext(new Context());
+            newConfig.setMapperContext(new Context());
+            newConfig.setReducerContext(new Context());
             newConfig.setTitle("Testing");
             newConfig.addInputPath(args[0]);
             newConfig.addOutputPath(args[1]);
