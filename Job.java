@@ -43,16 +43,6 @@ class Job {
             System.out.println("Other error: " + e.getMessage() + " cause: " + e.getCause());
         }
     }
-    void runJob(){
-        long now = System.currentTimeMillis();
-        parse();
-        map();
-        //reduce();
-        //output();
-        System.out.println("Completed Job: " + "'" + config.getJobName() + "'" + " to "
-                + config.getOutputPath() + " in " + (System.currentTimeMillis() - now)
-                + "ms");
-    }
     @SuppressWarnings({"unchecked", "unused"})
     private void reduce(){
         try{
@@ -82,5 +72,15 @@ class Job {
         }catch(Exception e){
             System.out.println("Cause: " + e.getCause() + " Message: " + e.getMessage());
         }
+    }
+    void runJob(){
+        long now = System.currentTimeMillis();
+        parse();
+        map();
+        //reduce();
+        //output();
+        System.out.println("Completed Job: " + "'" + config.getJobName() + "'" + " to "
+                + config.getOutputPath() + " in " + (System.currentTimeMillis() - now)
+                + "ms");
     }
 }
