@@ -1,5 +1,8 @@
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by Oliver Bathurst on 13/10/2017.
@@ -50,8 +53,11 @@ class Job {
                 if (config.getReducer() != null) {
                     Constructor cons = config.getReducer().getConstructor(String.class, Iterable.class, Context.class);
                     /////TEST
-                    cons.newInstance("key", new ArrayList<Integer>(), config.getReducerContext());
-                    System.out.println("Success");
+                    for (Map.Entry<Object, Object> objectEntry : (Iterable<Map.Entry<Object, Object>>) config.getMapperContext().getMap().entrySet()) {
+                        cons.newInstance(objectEntry.getKey().toString(), config.getMapperContext().getMap().values(), config.getReducerContext());
+                        System.out.println("Success");
+
+                    }
                     /////TEST
                 } else {
                     System.out.println("Reducer method 'reduce' not defined\n" +
