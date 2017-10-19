@@ -1,7 +1,5 @@
-import java.io.*;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
-import java.util.Scanner;
 
 /**
  * Created by Oliver Bathurst on 13/10/2017.
@@ -12,36 +10,26 @@ import java.util.Scanner;
  */
 
 class Job {
-    private Config config;
-    private final ArrayList<String> readRow = new ArrayList<>();
+    private final Config config;
+    private Parser parse;
 
-    Job(){}
-
-    void setJobConfig(Config conf){
-        config = conf;
+    Job(Config conf){
+        this.config = conf;
     }
 
-    private void read(){
-        try {
-            Scanner scanner = new Scanner(new File(config.getInputPath()));
-            while(scanner.hasNextLine()){
-                readRow.add(scanner.nextLine());
-            }
-            scanner.close();
-        }catch(FileNotFoundException e){
-            System.out.println("EXCEPTION: File not Found Exception\n"
-                    + e.getMessage());
-        }
+    private void parse(){
+        parse = new Parser(config.getInputPath());
+        parse.run();
     }
+
     @SuppressWarnings("unchecked")
     private void map(){
         try {
             if(config.getContext() != null) {
                 if (config.getMapper() != null) {
-                    //String regex = (config.getRegex() != null ? config.getRegex() : ","); //default to comma if no regex provided
-                    Constructor cons = config.getMapper().getConstructor(String.class, Context.class);
-                    for (String s : readRow) { //for each row/string in the list
-                        cons.newInstance(s, config.getContext());//split using regex to get string array and invoke the map method with that parameter , config.getContext()
+                    Constructor<?> cons = config.getMapper().getConstructor(String.class, Context.class);
+                    for (String str : parse.returnMap()) { //for each row/string in the list
+                        cons.newInstance(str, config.getContext());//Invoke the map method with each string (line) and the context
                     }
                 } else {
                     System.out.println("Mapper method 'mapper' not defined\n" +
@@ -51,16 +39,13 @@ class Job {
                 System.out.println("Context not defined\n" +
                         "use config.setContext(context);");//no context found
             }
-        }catch(NoSuchMethodException e){ //catch exception to give feedback
-            System.out.println("EXCEPTION: No Such Method Exception\n"
-                            + e.getMessage() + "\npublic map(String[] args) constructor not found in map class");
         }catch(Exception e) {
-            e.printStackTrace(); //print other errors
+            System.out.println("Other error: " + e.getMessage() + " cause: " + e.getCause());
         }
     }
     void runJob(){
         long now = System.currentTimeMillis();
-        read();
+        parse();
         map();
         //reduce();
         //output();
@@ -71,17 +56,31 @@ class Job {
     @SuppressWarnings({"unchecked", "unused"})
     private void reduce(){
         try{
-            if(config.getReducer() != null){
-                Constructor cons = config.getReducer().getConstructor(String[].class);
+            if(config.getContext() != null) {
+                if (config.getReducer() != null) {
+                    Constructor cons = config.getReducer().getConstructor(String.class, Iterable.class, Context.class);
+                    try {
+                        /////TEST
+                        cons.newInstance("key", new ArrayList<Integer>(), config.getContext());
+                        System.out.println("Success");
+                        /////TEST
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    System.out.println("Reducer method 'reduce' not defined\n" +
+                            "use config.setReducer(class);");//no reduce method found
+                }
             }else{
-                System.out.println("Reducer method 'reduce' not defined\n" +
-                        "use config.setReducer(class);");//no reduce method found
+                System.out.println("Context not defined\n" +
+                        "use config.setContext(context);");//no context found
             }
         }catch(NoSuchMethodException e){
             System.out.println("EXCEPTION: No Such Method Exception\n"
                     + e.getMessage() + "\npublic reduce(String[] args) constructor not found in reduce class");
         }
     }
+    @SuppressWarnings("EmptyTryBlock")
     private void output(){
         try {
             //FileWriter fw = new FileWriter(new File(config.getOutputPath()));

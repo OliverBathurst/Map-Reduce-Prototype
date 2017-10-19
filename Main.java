@@ -13,32 +13,31 @@ class Main {
             Config newConfig = new Config();
             newConfig.setMapper(map.class);
             newConfig.setReducer(reduce.class);
-            newConfig.setComparator(comparator.class);
+            //newConfig.setComparator(comparator.class);
             newConfig.setContext(new Context());
             newConfig.setTitle("Testing");
             newConfig.addInputPath(args[0]);
             newConfig.addOutputPath(args[1]);
 
-            Job newJob = new Job();
-            newJob.setJobConfig(newConfig);
-            newJob.runJob();
+            new Job(newConfig).runJob();
         }else{
             System.out.println("Insufficient number of arguments\n" +
                     "java -jar mapReduce.jar inputfile outputfile");
         }
     }
-    public static class reduce extends Reducer{
-        public reduce(String[] arguments) {}
-    }
-    public static class map extends Mapper{
-        public map(String values, Context context) {
-            String[] arr = values.split(",");
-            context.write(arr[0], arr[1]);
-            //for(String str: arguments){
-            //    System.out.println(str);
-            //}
-            //context.write(arguments[0], arguments[1]);
+    //
+    @SuppressWarnings("WeakerAccess")
+    public static class reduce {
+        public reduce(String key, Iterable<Integer> values, Context context) {
+
+
         }
     }
-    public static class comparator{}
+    @SuppressWarnings("WeakerAccess")
+    public static class map {
+        public map(String values, Context context) {
+            String[] arr = values.split(",");
+            context.write(arr[0], arr[1]); //example
+        }
+    }
 }
