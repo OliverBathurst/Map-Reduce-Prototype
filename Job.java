@@ -1,8 +1,7 @@
+import java.io.File;
+import java.io.FileWriter;
 import java.lang.reflect.Constructor;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Created by Oliver Bathurst on 13/10/2017.
@@ -52,13 +51,9 @@ class Job {
             if(config.getReducerContext() != null) {
                 if (config.getReducer() != null) {
                     Constructor cons = config.getReducer().getConstructor(String.class, Iterable.class, Context.class);
-                    /////TEST
                     for (Map.Entry<Object, Object> objectEntry : (Iterable<Map.Entry<Object, Object>>) config.getMapperContext().getMap().entrySet()) {
                         cons.newInstance(objectEntry.getKey().toString(), config.getMapperContext().getMap().values(), config.getReducerContext());
-                        System.out.println("Success");
-
                     }
-                    /////TEST
                 } else {
                     System.out.println("Reducer method 'reduce' not defined\n" +
                             "use config.setReducer(class);");//no reduce method found
@@ -71,10 +66,15 @@ class Job {
             System.out.println("Other error: " + e.getMessage() + " cause: " + e.getCause());
         }
     }
-    @SuppressWarnings("EmptyTryBlock")
+    @SuppressWarnings("unchecked")
     private void output(){
         try {
-            //FileWriter fw = new FileWriter(new File(config.getOutputPath()));
+            FileWriter fw = new FileWriter(new File(config.getOutputPath()));
+            for (Map.Entry<Object, Object> objectEntry : (Iterable<Map.Entry<Object, Object>>) config.getReducerContext().getMap().entrySet()) {
+                fw.write("Key: " + objectEntry.getKey() + " Value: " + objectEntry.getValue());
+            }
+            fw.flush();
+            fw.close();
         }catch(Exception e){
             System.out.println("Cause: " + e.getCause() + " Message: " + e.getMessage());
         }
@@ -83,8 +83,8 @@ class Job {
         long now = System.currentTimeMillis();
         parse();
         map();
-        //reduce();
-        //output();
+        reduce();
+        output();
         System.out.println("Completed Job: " + "'" + config.getJobName() + "'" + " to "
                 + config.getOutputPath() + " in " + (System.currentTimeMillis() - now)
                 + "ms");

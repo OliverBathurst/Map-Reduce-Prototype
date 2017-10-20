@@ -26,19 +26,17 @@ class Main {
                     "java -jar mapReduce.jar inputfile outputfile");
         }
     }
-    //
-    @SuppressWarnings("WeakerAccess")
-    public static class reduce {
-        public reduce(String key, Iterable<Integer> values, Context context) {
-
-
-        }
-    }
     @SuppressWarnings("WeakerAccess")
     public static class map {
         public map(String values, Context context) {
             String[] arr = values.split(",");
             context.write(arr[0], arr[1]); //example
+        }
+    }
+    @SuppressWarnings("WeakerAccess")
+    public static class reduce {
+        public reduce(String key, Iterable<Integer> values, Context context) {
+
         }
     }
 }

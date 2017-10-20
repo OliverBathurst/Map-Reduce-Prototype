@@ -20,6 +20,7 @@ class Config {
     void setComparator(Class compare){
         comparator = compare;
     }
+    @SuppressWarnings("SameParameterValue")
     void setTitle(String name){
         jobName = name;
     }
