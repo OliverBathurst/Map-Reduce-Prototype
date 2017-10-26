@@ -90,7 +90,6 @@ class Job {
 
                     for(ArrayList<Pair<Object,Object>> mapperSet: mapperNodes){ //loop through mapper instances
                         for (Pair<Object, Object> objectEntry : mapperSet) { //loop through entries on the mapper node
-
                             boolean contains = false;
                             for(Pair<Object, ArrayList<Object>> pair : pairs){
                                 if(pair.getKey().equals(objectEntry.getKey())){
@@ -117,8 +116,7 @@ class Job {
                         "use config.setReducerContext(context);");//no context found
             }
         }catch(Exception e){
-            //System.out.println("Other error: " + e.getMessage() + " cause: " + e.getCause());
-            e.printStackTrace();
+            System.out.println("Other error: " + e.getMessage() + " cause: " + e.getCause());
         }
     }
     @SuppressWarnings("unchecked")
