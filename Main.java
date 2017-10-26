@@ -1,3 +1,4 @@
+
 /**
  * Created by Oliver Bathurst on 13/10/2017.
  * All Rights Reserved
@@ -26,13 +27,22 @@ class Main {
     @SuppressWarnings("WeakerAccess")
     public static class map {
         public map(String values, Context context) {
-
+            String[] str = values.split("\t");
+            context.write(str[0] , str[1]); //country and pop
         }
     }
     @SuppressWarnings("WeakerAccess")
     public static class reduce {
-        public reduce(Object key, Iterable<Integer> values, Context context) {
-
+        public reduce(Object key, Iterable<Object> values, Context context) {
+            int a = 0;
+            for(Object val: values){
+                try {
+                    a += Integer.parseInt(val.toString());
+                }catch(Exception e){
+                    e.printStackTrace();
+                }
+            }
+            context.write(key, a);
         }
     }
 }

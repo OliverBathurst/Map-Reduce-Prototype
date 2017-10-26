@@ -1,4 +1,6 @@
-import java.util.HashMap;
+import javafx.util.Pair;
+import java.util.ArrayList;
+
 /**
  * Created by Oliver Bathurst on 13/10/2017.
  * All Rights Reserved
@@ -8,11 +10,13 @@ import java.util.HashMap;
  */
 
 class Context {
-    private final HashMap<Object, Object> mapped = new HashMap<>();
+    private final ArrayList<Pair<Object, Object>> mapped = new ArrayList<>();
 
     Context(){}
+
     void write(Object a, Object b){
-        mapped.put(a,b);
+        mapped.add(new Pair<>(a,b));
     }
-    HashMap getMap(){ return mapped; }
+
+    ArrayList getMap(){ return mapped; }
 }

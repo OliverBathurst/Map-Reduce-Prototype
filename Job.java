@@ -3,9 +3,7 @@ import javafx.util.Pair;
 import java.io.File;
 import java.io.FileWriter;
 import java.lang.reflect.Constructor;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by Oliver Bathurst on 13/10/2017.
@@ -16,9 +14,10 @@ import java.util.Map;
  */
 
 class Job {
-    private final ArrayList<ArrayList<Map.Entry<Object,Object>>> mapperNodes = new ArrayList<>(); //stores a list of array lists, these are the mapper instances of size 128 each
+    private final ArrayList<ArrayList<Pair<Object,Object>>> mapperNodes = new ArrayList<>(); //stores a list of array lists, these are the mapper instances of size 128 each
     private final Config config;
     private Parser parse;
+    private static int BLOCK_SIZE = 128;
 
     Job(Config conf){
         this.config = conf;
@@ -37,6 +36,7 @@ class Job {
                     System.out.println("Running Mapper...");
                     Constructor<?> cons = config.getMapper().getConstructor(String.class, Context.class);
                     System.out.println("Running map...");
+
                     for (String str : parse.returnMap()) { //for each row/string in the list
                         System.out.println("Passing: " + str);
                         cons.newInstance(str, config.getMapperContext());//Invoke the map method with each string (line) and the context
@@ -55,19 +55,26 @@ class Job {
     }
     @SuppressWarnings({"unchecked", "unused"})
     private void partitioner(){
-        ArrayList<Map.Entry<Object,Object>> split = new ArrayList<>();
-        int count = 0;
-        for(Map.Entry<Object, Object> objectEntry : (Iterable<Map.Entry<Object, Object>>) config.getMapperContext().getMap()) {
-            if (count != 128) { //set to split at 128 entries
-                split.add(objectEntry);
-                count++;
-            }else{
-                mapperNodes.add(split);
-                System.out.println("Mapper instances count: " + mapperNodes.size());
-                split.clear();
-                count = 0;
+        System.out.println(config.getMapperContext().getMap().size() + " items");
+
+        mapperNodes.add((ArrayList<Pair<Object, Object>>) config.getMapperContext().getMap());
+
+        /*ArrayList<Pair<Object,Object>> split = new ArrayList<>(BLOCK_SIZE);
+        if(config.getMapperContext().getMap().size() <= BLOCK_SIZE){
+            split.addAll((ArrayList<Pair<Object, Object>>) config.getMapperContext().getMap());
+            mapperNodes.add(split);
+        } else {
+            int count = config.getMapperContext().getMap().size();
+
+            for(int i = 0; i <= count; i += BLOCK_SIZE){
+                if(i+BLOCK_SIZE > count){
+                    mapperNodes.add(new ArrayList<>(config.getMapperContext().getMap().subList(i, count)));
+                    break;
+                }else{
+                    mapperNodes.add(new ArrayList<>(config.getMapperContext().getMap().subList(i,i+BLOCK_SIZE)));
+                }
             }
-        }
+        }*/
     }
     @SuppressWarnings({"unchecked", "unused"})
     private void reduce(){
@@ -76,16 +83,16 @@ class Job {
                 if (config.getReducer() != null) {
                     System.out.println("Running Reducer...");
                     Constructor cons = config.getReducer().getConstructor(Object.class, Iterable.class, Context.class);
-                    System.out.println("Running reduce...");
-                    System.out.println("Map size: " + config.getMapperContext().getMap().size());
+                    System.out.println("Found reduce method...");
                     System.out.println("Maps: " + mapperNodes.size());
 
-                    ArrayList<Pair<Object, List<Object>>> pairs = new ArrayList<>(); //stores for "key, Iterable<values>" in reducer
+                    ArrayList<Pair<Object, ArrayList<Object>>> pairs = new ArrayList<>(); //stores for "key, Iterable<values>" in reducer
 
-                    for(ArrayList<Map.Entry<Object,Object>> mapperSet: mapperNodes){ //loop through mapper instances
-                        for (Map.Entry<Object, Object> objectEntry : mapperSet) { //loop through entries on the mapper node
+                    for(ArrayList<Pair<Object,Object>> mapperSet: mapperNodes){ //loop through mapper instances
+                        for (Pair<Object, Object> objectEntry : mapperSet) { //loop through entries on the mapper node
+
                             boolean contains = false;
-                            for(Pair<Object, List<Object>> pair : pairs){
+                            for(Pair<Object, ArrayList<Object>> pair : pairs){
                                 if(pair.getKey().equals(objectEntry.getKey())){
                                     pair.getValue().add(objectEntry.getValue());//if it already exists add it's value to its list
                                     contains = true; //if it contains it
@@ -94,11 +101,11 @@ class Job {
                             }
                             if(!contains){
                                 System.out.println("Creating new pair....");
-                                pairs.add(new Pair(objectEntry.getKey(), new ArrayList<>().add(objectEntry.getValue())));
+                                pairs.add(new Pair(objectEntry.getKey(), new ArrayList(Collections.singletonList(objectEntry.getValue()))));
                             }
                         }
                     }
-                    for(Pair<Object, List<Object>> toReduce : pairs){ //finally send the key and iterable values to reducer
+                    for(Pair<Object, ArrayList<Object>> toReduce : pairs){ //finally send the key and iterable values to reducer
                         cons.newInstance(toReduce.getKey(), toReduce.getValue(), config.getReducerContext());
                     }
                 } else {
@@ -110,7 +117,8 @@ class Job {
                         "use config.setReducerContext(context);");//no context found
             }
         }catch(Exception e){
-            System.out.println("Other error: " + e.getMessage() + " cause: " + e.getCause());
+            //System.out.println("Other error: " + e.getMessage() + " cause: " + e.getCause());
+            e.printStackTrace();
         }
     }
     @SuppressWarnings("unchecked")
@@ -118,7 +126,8 @@ class Job {
         try {
             System.out.println("Writing to file...");
             FileWriter fw = new FileWriter(new File(config.getOutputPath()));
-            for (Map.Entry<Object, Object> objectEntry : (Iterable<Map.Entry<Object, Object>>) config.getReducerContext().getMap().entrySet()) {
+            System.out.println("Reduced set size: " + config.getReducerContext().getMap().size());
+            for (Pair<Object, Object> objectEntry : (ArrayList<Pair<Object, Object>>) config.getReducerContext().getMap()) {
                 fw.write("Key: " + objectEntry.getKey() + " Value: " + objectEntry.getValue());
             }
             fw.flush();
