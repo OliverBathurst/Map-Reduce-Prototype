@@ -7,7 +7,6 @@
  */
 
 class Main {
-    static int sum = 0;
     public static void main(String[] args) {
         if(args.length == 2) {
             Config newConfig = new Config();
@@ -27,19 +26,13 @@ class Main {
     @SuppressWarnings("WeakerAccess")
     public static class map {
         public map(String values, Context context) {
-            String[] arr = values.split("\t");
-            sum += Integer.parseInt(arr[1]);
-            context.write(arr[0],sum);
+
         }
     }
     @SuppressWarnings("WeakerAccess")
     public static class reduce {
-        public reduce(String key, Iterable<Integer> values, Context context) {
-            int a = 0;
-            for(Integer b: values){
-                a = a + b;
-            }
-            context.write(key, a);
+        public reduce(Object key, Iterable<Integer> values, Context context) {
+
         }
     }
 }

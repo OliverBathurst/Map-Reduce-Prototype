@@ -7,7 +7,7 @@
  */
 
 class Config {
-    private Class reduce, map, comparator;
+    private Class reduce, map;
     private String jobName, input, output;
     private Context contextMapper, contextReducer;
 
@@ -16,9 +16,6 @@ class Config {
     }
     void setMapper(Class mapper){
         map = mapper;
-    }
-    void setComparator(Class compare){
-        comparator = compare;
     }
     @SuppressWarnings("SameParameterValue")
     void setTitle(String name){
@@ -56,8 +53,5 @@ class Config {
     }
     Class getMapper(){
         return map;
-    }
-    Class getComparator(){
-        return comparator;
     }
 }
