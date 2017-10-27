@@ -7,6 +7,7 @@
  */
 
 class Config {
+    private int BLOCK_SIZE = 128;
     private Class reduce, map;
     private String jobName, input, output;
     private Context contextMapper, contextReducer;
@@ -32,6 +33,13 @@ class Config {
     }
     void setMapperContext(Context context){
         contextMapper = context;
+    }
+    @SuppressWarnings("SameParameterValue")
+    void setBlockSize(int num){
+        BLOCK_SIZE = num;
+    }
+    int getBlockSize(){
+        return BLOCK_SIZE;
     }
     Context getMapperContext(){
         return contextMapper;
