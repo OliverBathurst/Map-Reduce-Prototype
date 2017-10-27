@@ -26,7 +26,7 @@ class Job {
 
     private void parse(){
         System.out.println(getTime() + " Running Parser...");
-        parse = new Parser(config.getInputPath());
+        parse = new Parser(config.getInputPath(), config.getChunkSize());
         parse.run();
     }
     @SuppressWarnings("unchecked")
@@ -38,8 +38,16 @@ class Job {
                     Constructor<?> cons = config.getMapper().getConstructor(String.class, Context.class);
                     System.out.println(getTime() + " Found mapper method...");
 
-                    for (String str : parse.returnMap()) { //for each row/string in the list
-                        cons.newInstance(str, config.getMapperContext());//Invoke the map method with each string (line) and the context
+                    int a = 0;
+                    for(ArrayList<String> b: parse.returnMap()){
+                        a++;
+                    }
+                    System.out.println(getTime() + " Chunks: " + a);
+
+                    for(ArrayList<String> chunk : parse.returnMap()) {
+                        for (String str : chunk) { //for each row/string in the list
+                            cons.newInstance(str, config.getMapperContext());//Invoke the map method with each string (line) and the context
+                        }
                     }
                 } else {
                     System.out.println(getTime() + " Mapper method 'mapper' not defined\n" +
@@ -50,13 +58,12 @@ class Job {
                         "use config.setMapperContext(context);");//no context found
             }
         }catch(Exception e) {
-            e.printStackTrace();
-            //System.out.println(getTime() + " Other error: " + e.getMessage() + " cause: " + e.getCause());
+            System.out.println(getTime() + " Other error: " + e.getMessage() + " cause: " + e.getCause());
         }
     }
     private void shuffle(){
         Collections.shuffle(mapperNodes);
-    }
+    } //shuffle before being sent to reducer(s)
 
     @SuppressWarnings({"unchecked", "unused"})
     private void partitioner(){

@@ -18,7 +18,8 @@ class Main {
             newConfig.setTitle("Testing");
             newConfig.addInputPath(args[0]);
             newConfig.addOutputPath(args[1]);
-            newConfig.setBlockSize(256);
+            //newConfig.setBlockSize(256);//not really needed
+            //newConfig.setChunkSize(1);
             new Job(newConfig).runJob();
         }else{
             System.out.println("Insufficient number of arguments\n" +
@@ -29,9 +30,11 @@ class Main {
     public static class map {
         public map(String values, Context context) {
             String[] str = values.split("\t");
-            if(str[1] !=null && str[4] !=null) {
-                context.write(str[1], str[4]); //country and pop
-            }
+            //if(str[1] !=null && str[4] !=null) {
+            //    context.write(str[1], str[4]); //country and pop
+            //}
+            context.write(str[0], str[1]);
+
         }
     }
     @SuppressWarnings("WeakerAccess")

@@ -1,5 +1,4 @@
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -12,27 +11,41 @@ import java.util.Scanner;
  */
 
 class Parser {
-    private final ArrayList<String> readRow = new ArrayList<>();
+    private final ArrayList<ArrayList<String>> nodes = new ArrayList<>();
     private final String filepath;
+    private int CHUNK_SIZE = 2048;
 
-    Parser(String path){
+    Parser(String path, int size){
         this.filepath = path;
+        this.CHUNK_SIZE = size;
     }
 
-    ArrayList<String> returnMap(){
-        return readRow;
+    ArrayList<ArrayList<String>> returnMap(){
+        return nodes;
     }
 
     void run(){
         try {
+            ArrayList<String> tempStorage = new ArrayList<>(CHUNK_SIZE);
+            int counter = 0;
+
             Scanner scanner = new Scanner(new File(filepath));
             while(scanner.hasNextLine()){
-                readRow.add(scanner.nextLine());
+                if(counter != CHUNK_SIZE) {
+                    tempStorage.add(scanner.nextLine());
+                    counter++;
+                }else{
+                    nodes.add(new ArrayList<>(tempStorage));
+                    tempStorage.clear();
+                    counter = 0;
+                }
+            }
+            if (tempStorage.size() > 0){
+                nodes.add(new ArrayList<>(tempStorage));
             }
             scanner.close();
-        }catch(FileNotFoundException e){
-            System.out.println("EXCEPTION: File not Found Exception\n"
-                    + e.getMessage());
+        }catch(Exception e){
+            System.out.println("EXCEPTION: \n" + e.getMessage());
         }
     }
 }
