@@ -30,10 +30,10 @@ class Main {
     public static class map {
         public map(String values, Context context) {
             String[] str = values.split("\t");
-            //if(str[1] !=null && str[4] !=null) {
-            //    context.write(str[1], str[4]); //country and pop
-            //}
-            context.write(str[0], str[1]);
+            if(str[1] !=null && str[4] !=null) {
+                context.write(str[1], str[4]); //country and pop
+            }
+            //context.write(str[0], str[1]);
 
         }
     }

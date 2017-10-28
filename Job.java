@@ -15,8 +15,9 @@ import java.util.*;
  */
 
 class Job {
-    private final ArrayList<ArrayList<Pair<Object,Object>>> mapperNodes = new ArrayList<>(); //stores a list of array lists, these are the mapper instances of size 128 each
+    private final ArrayList<ArrayList<Pair<Object, ArrayList<Object>>>> reducedMappers = new ArrayList<>();
     private final SimpleDateFormat LOG_TIME = new SimpleDateFormat("HH:mm:ss");
+    private final ArrayList<Context> mapperInstances = new ArrayList<>();
     private final Config config;
     private Parser parse;
 
@@ -38,16 +39,18 @@ class Job {
                     Constructor<?> cons = config.getMapper().getConstructor(String.class, Context.class);
                     System.out.println(getTime() + " Found mapper method...");
 
-                    int a = 0;
-                    for(ArrayList<String> b: parse.returnMap()){
-                        a++;
+                    for(int a = 0; a < parse.returnMap().size(); a++){
+                        System.out.println(getTime()+ " Creating new Context for chunk ID: " + a);
+                        mapperInstances.add(new Context()); //add a mapper instance for each chunk (1-1 mapping)
                     }
-                    System.out.println(getTime() + " Chunks: " + a);
+                    System.out.println(getTime() + " Chunks: " + mapperInstances.size());
 
+                    int contextNum = 0; //one context to one chunk
                     for(ArrayList<String> chunk : parse.returnMap()) {
-                        for (String str : chunk) { //for each row/string in the list
-                            cons.newInstance(str, config.getMapperContext());//Invoke the map method with each string (line) and the context
+                        for (String aChunk : chunk) { //for each row/string in the list
+                            cons.newInstance(aChunk, mapperInstances.get(contextNum));//Invoke the map method with each string (line) and the context
                         }
+                        contextNum++;
                     }
                 } else {
                     System.out.println(getTime() + " Mapper method 'mapper' not defined\n" +
@@ -61,33 +64,48 @@ class Job {
             System.out.println(getTime() + " Other error: " + e.getMessage() + " cause: " + e.getCause());
         }
     }
+
     private void shuffle(){
-        Collections.shuffle(mapperNodes);
+        Collections.shuffle(mapperInstances);
     } //shuffle before being sent to reducer(s)
 
     @SuppressWarnings({"unchecked", "unused"})
-    private void partitioner(){
-        int size = config.getMapperContext().getMap().size();
-        int block_size = config.getBlockSize();
-        for (int i = 0 ; i < size; i += block_size) {
-            mapperNodes.add(new ArrayList<>(config.getMapperContext().getMap().subList(i , i + block_size >= size ? size : i + block_size)));
+    private void reduce(){
+        try {
+            ArrayList<Pair<Object, ArrayList<Object>>> pairs = new ArrayList<>(); //stores for "key, Iterable<values>" in reducer
+
+            for(Context c: mapperInstances){
+                for(Pair<Object, Object> pairsFromContext : c.getMap()){
+                    boolean contains = false;
+                    for (Pair<Object, ArrayList<Object>> pair : pairs) {
+                        if (pair.getKey().equals(pairsFromContext.getKey())) {
+                            pair.getValue().add(pairsFromContext.getValue());//if it already exists add it's value to its list
+                            contains = true; //if it contains it
+                            break;
+                        }
+                    }
+                    if (!contains) {
+                        pairs.add(new Pair(pairsFromContext.getKey(), new ArrayList(Collections.singletonList(pairsFromContext.getValue()))));
+                    }
+                }
+                reducedMappers.add(new ArrayList<>(pairs));
+                pairs.clear();
+            }
+        }catch(Exception e){
+            System.out.println(getTime() + " Other error: " + e.getMessage() + " cause: " + e.getCause());
         }
     }
     @SuppressWarnings({"unchecked", "unused"})
-    private void reduce(){
+    private void merge(){
         try{
             if(config.getReducerContext() != null) {
                 if (config.getReducer() != null) {
-                    System.out.println(getTime() + " Running Reducer...");
                     Constructor cons = config.getReducer().getConstructor(Object.class, Iterable.class, Context.class);
-                    System.out.println(getTime() + " Found reduce method...");
-                    System.out.println(getTime() + " Map count: " + mapperNodes.size());
-                    System.out.println(getTime() + " Items: " + config.getMapperContext().getMap().size());
 
                     ArrayList<Pair<Object, ArrayList<Object>>> pairs = new ArrayList<>(); //stores for "key, Iterable<values>" in reducer
 
-                    for(ArrayList<Pair<Object,Object>> mapperSet: mapperNodes){ //loop through mapper instances
-                        for (Pair<Object, Object> objectEntry : mapperSet) { //loop through entries on the mapper node
+                    for(ArrayList<Pair<Object, ArrayList<Object>>> reduced: reducedMappers){ //loop through mapper instances
+                        for (Pair<Object, ArrayList<Object>> objectEntry : reduced) { //loop through entries on the mapper node
                             boolean contains = false;
                             for(Pair<Object, ArrayList<Object>> pair : pairs){
                                 if(pair.getKey().equals(objectEntry.getKey())){
@@ -97,8 +115,7 @@ class Job {
                                 }
                             }
                             if(!contains){
-                                System.out.println(getTime() + " Creating new pair....");
-                                pairs.add(new Pair(objectEntry.getKey(), new ArrayList(Collections.singletonList(objectEntry.getValue()))));
+                                pairs.add(new Pair(objectEntry.getKey(), new ArrayList(objectEntry.getValue())));
                             }
                         }
                     }
@@ -123,7 +140,7 @@ class Job {
             System.out.println(getTime() + " Writing to file...");
             FileWriter fw = new FileWriter(new File(config.getOutputPath()));
             System.out.println(getTime() + " Reduced set size: " + config.getReducerContext().getMap().size());
-            for (Pair<Object, Object> objectEntry : (ArrayList<Pair<Object, Object>>) config.getReducerContext().getMap()) {
+            for (Pair<Object, Object> objectEntry : config.getReducerContext().getMap()) {
                 fw.write("Key: " + objectEntry.getKey() + " Value: " + objectEntry.getValue() + "\n");
             }
             fw.flush();
@@ -136,9 +153,9 @@ class Job {
         long now = System.currentTimeMillis();
         parse();
         map();
-        partitioner();
         shuffle();
         reduce();
+        merge();
         output();
         System.out.println(getTime() + " Completed Job: " + "'" + config.getJobName() + "'" + " to "
                 + config.getOutputPath() + " in " + (System.currentTimeMillis() - now)

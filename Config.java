@@ -34,12 +34,15 @@ class Config {
     void setMapperContext(Context context){
         contextMapper = context;
     }
+    @SuppressWarnings("unused")
     void setBlockSize(int num){
         BLOCK_SIZE = num;
     }
+    @SuppressWarnings("unused")
     void setChunkSize(int num){
         CHUNK_SIZE = num;
     }
+    @SuppressWarnings("unused")
     int getBlockSize(){
         return BLOCK_SIZE;
     }

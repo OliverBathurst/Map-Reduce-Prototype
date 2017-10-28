@@ -18,5 +18,5 @@ class Context {
         mapped.add(new Pair<>(a,b));
     }
 
-    ArrayList getMap(){ return mapped; }
+    ArrayList<Pair<Object, Object>> getMap(){ return mapped; }
 }
