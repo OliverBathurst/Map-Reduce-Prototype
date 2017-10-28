@@ -2,14 +2,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-/**
- * Created by Oliver on 19/10/2017.
- * All Rights Reserved
- * Unauthorized copying of this file via any medium is strictly prohibited
- * Proprietary and confidential
- * Written by Oliver Bathurst <oliverbathurst12345@gmail.com>
- */
-
 class Parser {
     private final ArrayList<ArrayList<String>> chunks = new ArrayList<>();
     private final String filepath;
@@ -50,6 +42,7 @@ class Parser {
             if (tempStorage.size() > 0){ //if there's any lines left in storage
                 chunks.add(new ArrayList<>(tempStorage)); //create last chunk and add it
             }
+            tempStorage.clear();
             scanner.close();
         }catch(Exception e){
             System.out.println("EXCEPTION: \n" + e.getMessage());

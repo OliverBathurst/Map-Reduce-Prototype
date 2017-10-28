@@ -1,19 +1,10 @@
 import javafx.util.Pair;
 import java.util.ArrayList;
 
-/**
- * Created by Oliver Bathurst on 13/10/2017.
- * All Rights Reserved
- * Unauthorized copying of this file via any medium is strictly prohibited
- * Proprietary and confidential
- * Written by Oliver Bathurst <oliverbathurst12345@gmail.com>
- */
-
 class Context {
     private final ArrayList<Pair<Object, Object>> mapped = new ArrayList<>();//stores the kay/value pairs
 
     Context(){}
-
     /**
      * write the object,object pair to the list for this context
      * context.write(a,b); creates a pair of key a and value b
