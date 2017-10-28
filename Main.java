@@ -13,7 +13,6 @@ class Main {
             Config newConfig = new Config();
             newConfig.setMapper(map.class);
             newConfig.setReducer(reduce.class);
-            newConfig.setReducerContext(new Context());
             newConfig.setTitle("Testing");
             newConfig.addInputPath(args[0]);
             newConfig.addOutputPath(args[1]);
@@ -28,12 +27,11 @@ class Main {
     @SuppressWarnings("WeakerAccess")
     public static class map {
         public map(String values, Context context) {
-            String[] str = values.split("\t");
+            String[] str = values.split("\t"); //split with tab (tsv)
             if(str[1] !=null && str[4] !=null) {
                 context.write(str[1], str[4]); //country and pop
             }
             //context.write(str[0], str[1]);
-
         }
     }
     @SuppressWarnings("WeakerAccess")
