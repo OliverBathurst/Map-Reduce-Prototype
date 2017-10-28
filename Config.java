@@ -10,7 +10,7 @@ class Config {
     private int BLOCK_SIZE = 128, CHUNK_SIZE = 128;
     private Class reduce, map;
     private String jobName, input, output;
-    private Context contextMapper, contextReducer;
+    private Context contextReducer;
 
     void setReducer(Class reducer){
         reduce = reducer;
@@ -31,9 +31,6 @@ class Config {
     void setReducerContext(Context context){
         contextReducer = context;
     }
-    void setMapperContext(Context context){
-        contextMapper = context;
-    }
     @SuppressWarnings("unused")
     void setBlockSize(int num){
         BLOCK_SIZE = num;
@@ -48,9 +45,6 @@ class Config {
     }
     int getChunkSize(){
         return CHUNK_SIZE;
-    }
-    Context getMapperContext(){
-        return contextMapper;
     }
     Context getReducerContext(){
         return contextReducer;

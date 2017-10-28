@@ -13,7 +13,6 @@ class Main {
             Config newConfig = new Config();
             newConfig.setMapper(map.class);
             newConfig.setReducer(reduce.class);
-            newConfig.setMapperContext(new Context());
             newConfig.setReducerContext(new Context());
             newConfig.setTitle("Testing");
             newConfig.addInputPath(args[0]);

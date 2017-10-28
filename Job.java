@@ -33,32 +33,27 @@ class Job {
     @SuppressWarnings("unchecked")
     private void map(){
         try {
-            if(config.getMapperContext() != null) {
-                if (config.getMapper() != null) {
-                    System.out.println(getTime() + " Running Mapper...");
-                    Constructor<?> cons = config.getMapper().getConstructor(String.class, Context.class);
-                    System.out.println(getTime() + " Found mapper method...");
+            if (config.getMapper() != null) {
+                System.out.println(getTime() + " Running Mapper...");
+                Constructor<?> cons = config.getMapper().getConstructor(String.class, Context.class);
+                System.out.println(getTime() + " Found mapper method...");
 
-                    for(int a = 0; a < parse.returnMap().size(); a++){
-                        System.out.println(getTime()+ " Creating new Context for chunk ID: " + a);
-                        mapperInstances.add(new Context()); //add a mapper instance for each chunk (1-1 mapping)
-                    }
-                    System.out.println(getTime() + " Chunks: " + mapperInstances.size());
-
-                    int contextNum = 0; //one context to one chunk
-                    for(ArrayList<String> chunk : parse.returnMap()) {
-                        for (String aChunk : chunk) { //for each row/string in the list
-                            cons.newInstance(aChunk, mapperInstances.get(contextNum));//Invoke the map method with each string (line) and the context
-                        }
-                        contextNum++;
-                    }
-                } else {
-                    System.out.println(getTime() + " Mapper method 'mapper' not defined\n" +
-                            "use config.setMapper(class);");//no map method found
+                for(int a = 0; a < parse.returnMap().size(); a++){
+                    System.out.println(getTime()+ " Creating new Mapper for chunk ID: " + a);
+                    mapperInstances.add(new Context()); //add a mapper instance for each chunk (1-1 mapping)
                 }
-            }else{
-                System.out.println(getTime() + " Mapper context not defined\n" +
-                        "use config.setMapperContext(context);");//no context found
+                System.out.println(getTime() + " Chunks: " + mapperInstances.size());
+
+                int contextNum = 0; //one context to one chunk
+                for(ArrayList<String> chunk : parse.returnMap()) {
+                    for (String aChunk : chunk) { //for each row/string in the list
+                        cons.newInstance(aChunk, mapperInstances.get(contextNum));//Invoke the map method with each string (line) and the context
+                    }
+                    contextNum++;
+                }
+            } else {
+                System.out.println(getTime() + " Mapper method 'mapper' not defined\n" +
+                        "use config.setMapper(class);");//no map method found
             }
         }catch(Exception e) {
             System.out.println(getTime() + " Other error: " + e.getMessage() + " cause: " + e.getCause());
