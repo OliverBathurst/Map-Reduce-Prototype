@@ -1,7 +1,25 @@
 class Config {
     private int CHUNK_SIZE = 128;
+    private boolean multiThreaded = false;
+    private boolean shuffle = false;
+
     private Class reduce, map;
     private String jobName, input, output;
+
+    @SuppressWarnings("SameParameterValue")
+    void setShuffle(boolean b){
+        shuffle = b;
+    }
+    boolean getShuffle(){
+        return shuffle;
+    }
+    @SuppressWarnings("SameParameterValue")
+    void setMultiThreaded(boolean b){
+        multiThreaded = b;
+    }
+    boolean getMultiThreaded(){
+        return multiThreaded;
+    }
     void setReducer(Class reducer){
         reduce = reducer;
     }

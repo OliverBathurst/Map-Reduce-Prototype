@@ -4,10 +4,10 @@ import java.util.Collections;
 
 class Reducer {
     private final ArrayList<Pair<Object, ArrayList<Object>>> pairs = new ArrayList<>();
-    private final Mapper toReduce;
+    private final ArrayList<Pair<Object, Object>> fromMapper;
 
-    Reducer(Mapper map){
-        this.toReduce = map;
+    Reducer(ArrayList<Pair<Object, Object>> map){
+        this.fromMapper = map;
     }
 
     ArrayList<Pair<Object, ArrayList<Object>>> returnReduced(){
@@ -16,7 +16,7 @@ class Reducer {
 
     @SuppressWarnings("unchecked")
     void run(){
-        for(Pair<Object, Object> pairsFromContext : toReduce.returnMap().getMap()){
+        for(Pair<Object, Object> pairsFromContext : fromMapper){
             boolean contains = false;
             for (Pair<Object, ArrayList<Object>> pair : pairs) {
                 if (pair.getKey().equals(pairsFromContext.getKey())) {

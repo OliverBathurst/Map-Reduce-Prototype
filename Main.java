@@ -9,6 +9,8 @@ class Main {
             newConfig.addInputPath(args[0]);
             newConfig.addOutputPath(args[1]);
             //newConfig.setChunkSize(256);//not really needed, alter based on file size
+            newConfig.setShuffle(false);
+            newConfig.setMultiThreaded(false); //multithreading is slower in this instance
             new Job(newConfig).runJob();
         }else{
             System.out.println("Insufficient number of arguments\n" +

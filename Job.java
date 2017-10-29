@@ -4,11 +4,14 @@ import java.io.FileWriter;
 import java.lang.reflect.Constructor;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.*;
 
 class Job {
     private final SimpleDateFormat LOG_TIME = new SimpleDateFormat("HH:mm:ss");
     private final ArrayList<Mapper> mappers = new ArrayList<>();
     private final ArrayList<Reducer> reducers = new ArrayList<>();
+    private final int threadCount = Runtime.getRuntime().availableProcessors();
+    private ExecutorService service = Executors.newFixedThreadPool(threadCount);
     private final Context finalContext = new Context();
     private final Config config;
     private Parser parse;
@@ -48,8 +51,21 @@ class Job {
      * runs each map in order
      */
     private void runMap(){
-        for(Mapper map: mappers){
-            map.run();
+        if(config.getMultiThreaded()) {
+            System.out.println(getTime() + " Thread count: " + threadCount);
+            for (Mapper map : mappers) {
+                service.execute(map::run);
+            }
+            service.shutdown();
+            try {
+                service.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }else{
+            for(Mapper map: mappers){
+                map.run();
+            }
         }
     }
     /**
@@ -64,15 +80,31 @@ class Job {
      */
     private void reduce(){
         for(Mapper map: mappers){
-            reducers.add(new Reducer(map));
+            reducers.add(new Reducer(map.returnMap().getMap()));
         }
     }
     /**
      * runs each reducer in order
      */
     private void runReduce(){
-        for(Reducer r: reducers){
-            r.run();
+        if(config.getMultiThreaded()) {
+            if(service.isShutdown()){
+                service = Executors.newFixedThreadPool(threadCount);
+            }
+            System.out.println(getTime() + " Thread count: " + threadCount);
+            for (Reducer r : reducers) {
+                service.execute(r::run);
+            }
+            service.shutdown();
+            try {
+                service.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }else{
+            for(Reducer r: reducers){
+                r.run();
+            }
         }
     }
     @SuppressWarnings({"unchecked", "unused"})
@@ -80,7 +112,7 @@ class Job {
         try{
             if (config.getReducer() != null) {
                 Constructor cons = config.getReducer().getConstructor(Object.class, Iterable.class, Context.class);
-                for(Pair<Object, ArrayList<Object>> toReduce : new Merger(reducers).returnFinalPairs()){ //finally send the key and iterable values to reducer
+                for(Pair<Object, ArrayList<Object>> toReduce : new Merger(reducers).returnFinalPairs()){ //merge the reducers into a single key/value(list) and iterate over them
                     cons.newInstance(toReduce.getKey(), toReduce.getValue(), finalContext);
                 }
             } else {
@@ -114,16 +146,14 @@ class Job {
      */
     void runJob(){
         long now = System.currentTimeMillis();
-        parse();
-
-        map();
-        runMap(); //use thread here maybe
-
-        shuffle(); //shuffle mappers around
-
+        parse(); //parse input data into chunks
+        map(); //push everything into mapper array
+        runMap(); //run all mappers in mapper array
+        if(config.getShuffle()){
+            shuffle();//shuffle mappers around, will produce different ordering
+        }
         reduce();
-        runReduce(); //use thread here maybe
-
+        runReduce();
         merge();
         output();
         System.out.println(getTime() + " Completed Job: " + "'" + config.getJobName() + "'" + " to "
