@@ -76,7 +76,9 @@ class Job {
      * shuffle the mappers around before reducing them
      */
     private void shuffle(){
-        Collections.shuffle(mappers);
+        if(config.getShuffle()) {
+            Collections.shuffle(mappers);
+        }
     }
 
     /**
@@ -153,9 +155,7 @@ class Job {
         parse(); //parse input data into chunks
         assignChunksToMappers(); //push everything into mapper array
         runMappers(); //run all mappers in mapper array
-        if(config.getShuffle()){
-            shuffle();//shuffle mappers around, will produce different ordering
-        }
+        shuffle();//shuffle mappers around, will produce different ordering
         assignMappersToReducers();
         runReducers();
         merge();
