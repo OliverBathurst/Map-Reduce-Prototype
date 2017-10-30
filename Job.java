@@ -10,11 +10,11 @@ class Job {
     private final SimpleDateFormat LOG_TIME = new SimpleDateFormat("HH:mm:ss");
     private final ArrayList<Mapper> mappers = new ArrayList<>();
     private final ArrayList<Reducer> reducers = new ArrayList<>();
+    private final ArrayList<Parser> parsers = new ArrayList<>();
     private final int threadCount = Runtime.getRuntime().availableProcessors();
-    private ExecutorService service = Executors.newFixedThreadPool(threadCount);
     private final Context finalContext = new Context();
     private final Config config;
-    private Parser parse;
+    private ExecutorService service = Executors.newFixedThreadPool(threadCount);
 
     Job(Config conf){
         this.config = conf;
@@ -25,21 +25,25 @@ class Job {
      */
     private void parse(){
         System.out.println(getTime() + " Running Parser...");
-        parse = new Parser(config.getInputPath(), config.getChunkSize());
-        parse.run();
+        for(String str: config.getInputPaths()) { //get input files
+            parsers.add(new Parser(str, config.getChunkSize()));
+        }
+        for(Parser p: parsers){
+            p.run(); //run the parsers
+        }
     }
     @SuppressWarnings("unchecked")
-    private void map(){
+    private void assignChunksToMappers(){
         try {
             if (config.getMapper() != null) {
-                System.out.println(getTime() + " Running Mapper...");
                 Constructor<?> cons = config.getMapper().getConstructor(String.class, Context.class);
                 System.out.println(getTime() + " Found map method...");
-                System.out.println(getTime() + " Chunks: " + parse.returnMap().size());
-
-                for(ArrayList<String> chunk : parse.returnMap()) {
-                    mappers.add(new Mapper(chunk, new Context(), cons));
+                for(Parser p: parsers) {
+                    for (ArrayList<String> chunk : p.returnMap()) {
+                        mappers.add(new Mapper(chunk, new Context(), cons)); //give each chunk to a different mapper with a new context
+                    }
                 }
+                System.out.println(getTime() + " Mappers: " + mappers.size());
             } else {
                 System.out.println(getTime() + " Mapper method 'mapper' not defined\n" + "use config.setMapper(class);");//no map method found
             }
@@ -50,7 +54,7 @@ class Job {
     /**
      * runs each map in order
      */
-    private void runMap(){
+    private void runMappers(){
         if(config.getMultiThreaded()) {
             System.out.println(getTime() + " Thread count: " + threadCount);
             for (Mapper map : mappers) {
@@ -78,7 +82,7 @@ class Job {
     /**
      * creates a new reducer for each mapper (1-1 mapping) and adds each to an array of reducers
      */
-    private void reduce(){
+    private void assignMappersToReducers(){
         for(Mapper map: mappers){
             reducers.add(new Reducer(map.returnMap().getMap()));
         }
@@ -86,7 +90,7 @@ class Job {
     /**
      * runs each reducer in order
      */
-    private void runReduce(){
+    private void runReducers(){
         if(config.getMultiThreaded()) {
             if(service.isShutdown()){
                 service = Executors.newFixedThreadPool(threadCount);
@@ -147,13 +151,13 @@ class Job {
     void runJob(){
         long now = System.currentTimeMillis();
         parse(); //parse input data into chunks
-        map(); //push everything into mapper array
-        runMap(); //run all mappers in mapper array
+        assignChunksToMappers(); //push everything into mapper array
+        runMappers(); //run all mappers in mapper array
         if(config.getShuffle()){
             shuffle();//shuffle mappers around, will produce different ordering
         }
-        reduce();
-        runReduce();
+        assignMappersToReducers();
+        runReducers();
         merge();
         output();
         System.out.println(getTime() + " Completed Job: " + "'" + config.getJobName() + "'" + " to "

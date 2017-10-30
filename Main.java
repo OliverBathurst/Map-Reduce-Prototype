@@ -7,6 +7,7 @@ class Main {
             newConfig.setReducer(reduce.class);
             newConfig.setTitle("Testing");
             newConfig.addInputPath(args[0]);
+            //newConfig.addInputPath(args[2]); add as many input paths as you want
             newConfig.addOutputPath(args[1]);
             //newConfig.setChunkSize(256);//not really needed, alter based on file size
             newConfig.setShuffle(false);

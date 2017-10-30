@@ -1,4 +1,7 @@
+import java.util.ArrayList;
+
 class Config {
+    private ArrayList<String> inputFiles = new ArrayList<>();
     private int CHUNK_SIZE = 128;
     private boolean multiThreaded = false;
     private boolean shuffle = false;
@@ -31,7 +34,7 @@ class Config {
         jobName = name;
     }
     void addInputPath(String inputPath){
-        input = inputPath;
+        inputFiles.add(inputPath);
     }
     void addOutputPath(String outputPath){
         output = outputPath;
@@ -43,11 +46,11 @@ class Config {
     int getChunkSize(){
         return CHUNK_SIZE;
     }
+    ArrayList<String> getInputPaths(){
+        return inputFiles;
+    }
     String getJobName(){
         return jobName;
-    }
-    String getInputPath(){
-        return input;
     }
     String getOutputPath(){
         return output;
