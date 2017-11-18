@@ -22,8 +22,6 @@ class Main {
     public static class map {
         public map(String values, Context context) {
 
-
-
             String[] str = values.split(","); //split with comma (csv)
             if(str[0] != null && str[1] != null && str[2] != null && str[3] != null && str[4] != null && str[5] != null){
                 if(str[0].matches("[A-Z]{3}[0-9]{4}[A-Z]{2}[0-9]{1}") && str[1].matches("[A-Z]{3}[0-9]{4}[A-Z]{1}") && str[2].matches("[A-Z]{3}")
@@ -38,21 +36,19 @@ class Main {
                 }
             }
 
-
-
         }
     }
     @SuppressWarnings("WeakerAccess")
     public static class reduce {
         @SuppressWarnings("unused")
         public reduce(Object key, Iterable<Object> values, Context context) {
-            /*int a = 0;
             for(Object val: values){
-                try {
-                    a += Integer.parseInt(val.toString());
-                }catch(Exception ignored){ }
+                if(val instanceof AirportData){
+                    System.out.println("It's airport data");
+                }else if(val instanceof Flight){
+                    System.out.println("It's flight data");
+                }
             }
-            context.write(key, a);*/
         }
     }
 }
