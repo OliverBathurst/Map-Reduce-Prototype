@@ -1,13 +1,16 @@
 import java.util.ArrayList;
 
-class Config {
-    private ArrayList<String> inputFiles = new ArrayList<>();
-    private int CHUNK_SIZE = 128;
-    private boolean multiThreaded = false;
-    private boolean shuffle = false;
+/**
+ * Created by Oliver on 18/11/2017.
+ * Written by Oliver Bathurst <oliverbathurst12345@gmail.com>
+ */
 
+class Config {
+    private final ArrayList<String> inputFiles = new ArrayList<>();
+    private int CHUNK_SIZE = 128;
+    private boolean multiThreaded = false, shuffle = false;
     private Class reduce, map;
-    private String jobName, input, output;
+    private String jobName, output;
 
     @SuppressWarnings("SameParameterValue")
     void setShuffle(boolean b){

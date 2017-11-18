@@ -2,6 +2,11 @@ import javafx.util.Pair;
 import java.util.ArrayList;
 import java.util.Collections;
 
+/**
+ * Created by Oliver on 18/11/2017.
+ * Written by Oliver Bathurst <oliverbathurst12345@gmail.com>
+ */
+
 class Reducer {
     private final ArrayList<Pair<Object, ArrayList<Object>>> pairs = new ArrayList<>();
     private final ArrayList<Pair<Object, Object>> fromMapper;

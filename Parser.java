@@ -2,6 +2,11 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+/**
+ * Created by Oliver on 18/11/2017.
+ * Written by Oliver Bathurst <oliverbathurst12345@gmail.com>
+ */
+
 class Parser {
     private final ArrayList<ArrayList<String>> chunks = new ArrayList<>();
     private final String filepath;

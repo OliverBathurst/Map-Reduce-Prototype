@@ -1,6 +1,11 @@
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 
+/**
+ * Created by Oliver on 18/11/2017.
+ * Written by Oliver Bathurst <oliverbathurst12345@gmail.com>
+ */
+
 class Mapper {
     private final ArrayList<String> singleChunk;
     private final Context context;

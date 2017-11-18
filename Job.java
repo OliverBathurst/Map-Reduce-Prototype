@@ -6,6 +6,11 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.*;
 
+/**
+ * Created by Oliver on 18/11/2017.
+ * Written by Oliver Bathurst <oliverbathurst12345@gmail.com>
+ */
+
 class Job {
     private final SimpleDateFormat LOG_TIME = new SimpleDateFormat("HH:mm:ss");
     private final ArrayList<Mapper> mappers = new ArrayList<>();

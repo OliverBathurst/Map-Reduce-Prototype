@@ -1,6 +1,11 @@
 import javafx.util.Pair;
 import java.util.ArrayList;
 
+/**
+ * Created by Oliver on 18/11/2017.
+ * Written by Oliver Bathurst <oliverbathurst12345@gmail.com>
+ */
+
 class Merger {
     private final ArrayList<Pair<Object, ArrayList<Object>>> pairs = new ArrayList<>(); //stores for "key, Iterable<values>" in reducer
 
