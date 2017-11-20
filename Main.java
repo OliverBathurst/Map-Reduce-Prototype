@@ -7,7 +7,7 @@ import java.util.HashSet;
  */
 
 class Main {
-    static ArrayList tempArrayList = new ArrayList<>();
+    private static final ArrayList tempArrayList = new ArrayList<>();
 
     public static void main(String[] args) {
         Config newConfig = new Config();
@@ -36,9 +36,8 @@ class Main {
             }
         }
     }
-    @SuppressWarnings("WeakerAccess")
+    @SuppressWarnings({"WeakerAccess", "Annotator", "StringConcatenationInLoop", "unused", "unchecked"})
     public static class reduce {
-        @SuppressWarnings("unused")
         public reduce(Object key, Iterable<Object> values, Context context) {
 
             if (key.toString().matches("[A-Z]{3}[0-9]{4}[A-Z]{1}")) {
