@@ -8,16 +8,20 @@ import java.util.Date;
 
 @SuppressWarnings("unused")
 class Flight {
-    private final String passengerID, fromAirport, toAirport, flightTime;
-    private final SimpleDateFormat form = new SimpleDateFormat("DD-MM-YYYY HH:MM:SS");
+    private final String passengerID, fromAirport, toAirport, flightTime, flightID;
+    private final SimpleDateFormat form = new SimpleDateFormat("HH:MM:SS");
     private final Date depart;
 
-    Flight(String passID, String from, String to, String departureTime, String flightTime){
+    Flight(String flightID, String passID, String from, String to, String departureTime, String flightTime){
+        this.flightID = flightID;
         this.passengerID = passID;
         this.fromAirport = from;
         this.toAirport = to;
         this.flightTime = flightTime;
         this.depart = new Date(Long.parseLong(departureTime) * 1000);
+    }
+    String getFlightID(){
+        return flightID;
     }
     String getPassengerID(){
         return passengerID;

@@ -5,15 +5,15 @@
 
 @SuppressWarnings("unused")
 class AirportData {
-    private final String code, latitude, longitude;
+    private final String name, latitude, longitude;
 
-    AirportData(String code, String lat, String lon){
-        this.code = code;
+    AirportData(String name, String lat, String lon){
+        this.name = name;
         this.latitude = lat;
         this.longitude = lon;
     }
-    String getCode(){
-        return code;
+    String getName(){
+        return name;
     }
     String getLatitude(){
         return latitude;

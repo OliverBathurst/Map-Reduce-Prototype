@@ -1,4 +1,6 @@
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -30,25 +32,28 @@ class Parser {
      */
     void run(){
         try {
-            ArrayList<String> tempStorage = new ArrayList<>(CHUNK_SIZE); //provide temp storage array list
-            int counter = 0; //initialise the counter for checking chunk size
+            ArrayList<String> tempStorage = new ArrayList<>(CHUNK_SIZE);
+            int counter = 0;
+            BufferedReader f = new BufferedReader(new FileReader(filepath));
+            String line;
 
-            Scanner scanner = new Scanner(new File(filepath)); //init scanner
-            while(scanner.hasNextLine()){
-                if(counter != CHUNK_SIZE) { //if the counter is not up to the specified chunk size
-                    tempStorage.add(scanner.nextLine()); //add the line to the current chunk
-                    counter++;
-                }else{ //if we reach chunk limit
-                    chunks.add(new ArrayList<>(tempStorage)); //add the chunk to the chunks list
-                    tempStorage.clear(); //clear the list for next chunk
-                    counter = 0; //reset counter
+            while ((line = f.readLine()) != null ){
+                if(line.length() > 0) {
+                    if (counter != CHUNK_SIZE) {
+                        tempStorage.add(line);
+                        counter++;
+                    } else { //if we reach chunk limit
+                        chunks.add(new ArrayList<>(tempStorage)); //add the chunk to the chunks list
+                        tempStorage.clear(); //clear the list for next chunk
+                        counter = 0; //reset counter
+                    }
                 }
             }
+
             if (tempStorage.size() > 0){ //if there's any lines left in storage
                 chunks.add(new ArrayList<>(tempStorage)); //create last chunk and add it
             }
             tempStorage.clear();
-            scanner.close();
         }catch(Exception e){
             System.out.println("EXCEPTION: \n" + e.getMessage());
         }

@@ -31,6 +31,7 @@ class Job {
     private void parse(){
         System.out.println(getTime() + " Running Parser...");
         for(String str: config.getInputPaths()) { //get input files
+            System.out.println(getTime() + " Reading from: " + str);
             parsers.add(new Parser(str, config.getChunkSize()));
         }
         for(Parser p: parsers){
