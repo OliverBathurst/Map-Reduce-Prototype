@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Created by Oliver on 18/11/2017.
@@ -8,6 +9,8 @@ import java.util.HashSet;
 
 class Main {
     private static final ArrayList tempArrayList = new ArrayList<>();
+    private static final Set tempHashSet = new HashSet();
+    private static final StringBuilder flightConcat = new StringBuilder();
 
     public static void main(String[] args) {
         Config newConfig = new Config();
@@ -26,7 +29,6 @@ class Main {
     public static class map {
         public map(String values, Context context) {
             String[] str = values.split(","); //split with comma (csv)
-
             if (str[0].matches("[A-Z]{3,20}") && str[1].matches("[A-Z]{3}") && str[2].matches("[0-9]{1,3}\\.[0-9]{3,13}") && str[3].matches("[0-9]{1,3}\\.[0-9]{3,13}")) {
                 context.write(str[1], new AirportData(str[0], str[2], str[3]));
             }
@@ -36,34 +38,32 @@ class Main {
             }
         }
     }
-    @SuppressWarnings({"WeakerAccess", "Annotator", "StringConcatenationInLoop", "unused", "unchecked"})
+    @SuppressWarnings({"WeakerAccess", "Annotator", "unused", "unchecked"})
     public static class reduce {
         public reduce(Object key, Iterable<Object> values, Context context) {
-
             if (key.toString().matches("[A-Z]{3}[0-9]{4}[A-Z]{1}")) {
-                String valuesToAdd = "";
                 int passengers = 0;
+                flightConcat.setLength(0);
 
                 for (Object val : values) {
                     if (val instanceof ArrayList) {
                         for (Object flight : (ArrayList) val) {
                             if (flight instanceof Flight) {
                                 Flight flightData = (Flight) flight;
-                                valuesToAdd += "\n" + "FLIGHT ID: " + flightData.getFlightID() + "\n" + "FROM: " + flightData.getFrom() + "\n" +
-                                        "TO: " + flightData.getTo() + "\n" + "DEPARTURE TIME: " + flightData.getDepartTime()
-                                        + "\n" + "FLIGHT TIME (M): " + flightData.getFlightTime() + "\n" + "ARRIVAL TIME: " + flightData.getArrivalTime() + "\n"
-                                        + "PASSENGER ID: " + flightData.getPassengerID() + "\n";
+
+                                flightConcat.append("\n" + "FLIGHT ID: ").append(flightData.getFlightID()).append("\n").append("FROM: ").append(flightData.getFrom()).append("\n").append("TO: ").append(flightData.getTo()).append("\n").append("DEPARTURE TIME: ").append(flightData.getDepartTime()).append("\n").append("FLIGHT TIME (M): ").append(flightData.getFlightTime()).append("\n").append("ARRIVAL TIME: ").append(flightData.getArrivalTime()).append("\n").append("PASSENGER ID: ").append(flightData.getPassengerID()).append("\n");
                                 passengers++;
                             }
                         }
                     }
                 }
-                context.write(key, valuesToAdd);
+                context.write(key, flightConcat.toString());
                 context.write(key, "Passengers: " + passengers);
             }
 
             if (key.toString().matches("[A-Z]{3}")) {
                 tempArrayList.clear();
+                tempHashSet.clear();
                 String airport = "";
                 for (Object val : values) {
                     if (val instanceof ArrayList) {
@@ -79,7 +79,8 @@ class Main {
                         }
                     }
                 }
-                context.write(key, airport + "NO. OF FLIGHTS: " + new HashSet(tempArrayList).size() + "\n");
+                tempHashSet.addAll(tempArrayList);
+                context.write(key, airport + "NO. OF FLIGHTS FROM AIRPORT: " + tempHashSet.size() + "\n");
             }
         }
     }

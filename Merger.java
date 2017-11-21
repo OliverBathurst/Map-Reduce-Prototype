@@ -1,5 +1,6 @@
 import javafx.util.Pair;
 import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Created by Oliver on 18/11/2017.
@@ -12,17 +13,17 @@ class Merger {
     @SuppressWarnings("unchecked")
     Merger(ArrayList<Reducer> reducerList){
         for(Reducer reduce : reducerList){
-            for (Pair<Object, ArrayList<Object>> reduced : reduce.returnReduced()) { //loop through mapper instances
+            for (Pair<Object, ArrayList<Object>> reduced : reduce.returnReduced()) { //loop through reducers
                 boolean contains = false;
                 for (Pair<Object, ArrayList<Object>> pair : pairs) {
                     if (pair.getKey().equals(reduced.getKey())) {
-                        pair.getValue().add(reduced.getValue());//if it already exists add it's value to its list
+                        pair.getValue().add(reduced.getValue());//if it already exists add its value to its list
                         contains = true; //if it contains it
                         break;
                     }
                 }
                 if (!contains) {
-                    pairs.add(new Pair(reduced.getKey(), new ArrayList(reduced.getValue())));
+                    pairs.add(new Pair(reduced.getKey(), new ArrayList<>(Collections.singletonList(reduced.getValue()))));
                 }
             }
         }
