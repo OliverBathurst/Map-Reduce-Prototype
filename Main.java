@@ -41,6 +41,7 @@ class Main {
     @SuppressWarnings({"WeakerAccess", "Annotator", "unused", "unchecked"})
     public static class reduce {
         public reduce(Object key, Iterable<Object> values, Context context) {
+            
             if (key.toString().matches("[A-Z]{3}[0-9]{4}[A-Z]{1}")) {
                 int passengers = 0;
                 flightConcat.setLength(0);
@@ -50,7 +51,6 @@ class Main {
                         for (Object flight : (ArrayList) val) {
                             if (flight instanceof Flight) {
                                 Flight flightData = (Flight) flight;
-
                                 flightConcat.append("\n" + "FLIGHT ID: ").append(flightData.getFlightID()).append("\n").append("FROM: ").append(flightData.getFrom()).append("\n").append("TO: ").append(flightData.getTo()).append("\n").append("DEPARTURE TIME: ").append(flightData.getDepartTime()).append("\n").append("FLIGHT TIME (M): ").append(flightData.getFlightTime()).append("\n").append("ARRIVAL TIME: ").append(flightData.getArrivalTime()).append("\n").append("PASSENGER ID: ").append(flightData.getPassengerID()).append("\n");
                                 passengers++;
                             }
