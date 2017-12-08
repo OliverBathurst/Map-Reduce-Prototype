@@ -20,9 +20,8 @@ class Context {
     void write(Object a, Object b){
         mapped.add(new Pair<>(a,b));
     }
-
     /**
      * return the list of pairs
      */
-    ArrayList<Pair<Object, Object>> getMap(){ return mapped; }
+    ArrayList<Pair<Object, Object>> getMap(){return mapped;}
 }

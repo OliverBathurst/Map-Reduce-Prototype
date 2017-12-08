@@ -86,26 +86,20 @@ class Job {
             Collections.shuffle(mappers);
         }
     }
-
-    /**
-     * creates a new reducer for each mapper (1-1 mapping) and adds each to an array of reducers
-     */
-    private void assignMappersToReducers(){
-        for(Mapper map: mappers){
-            reducers.add(new Reducer(map.returnMap().getMap()));
-        }
-    }
     /**
      * runs each reducer in order
      */
     private void runReducers(){
+        for(Mapper map: mappers){
+            reducers.add(new Reducer(map.returnMap().getMap()));
+        }
         if(config.getMultiThreaded()) {
             if(service.isShutdown()){
                 service = Executors.newFixedThreadPool(threadCount);
             }
             System.out.println(getTime() + " Thread count: " + threadCount);
             for (Reducer r : reducers) {
-                service.execute(r::run);
+                service.execute(r::reduce);
             }
             service.shutdown();
             try {
@@ -115,16 +109,19 @@ class Job {
             }
         }else{
             for(Reducer r: reducers){
-                r.run();
+                r.reduce();
             }
         }
     }
+    private ArrayList<Pair<Object, ArrayList<Object>>> combineReducers(){
+        return new Merger(reducers).returnFinalPairs();
+    }
     @SuppressWarnings({"unchecked", "unused"})
-    private void merge(){
+    private void reduce(){
         try{
             if (config.getReducer() != null) {
                 Constructor cons = config.getReducer().getConstructor(Object.class, Iterable.class, Context.class);
-                for(Pair<Object, ArrayList<Object>> toReduce : new Merger(reducers).returnFinalPairs()){ //merge the reducers into a single key/value(list) and iterate over them
+                for(Pair<Object, ArrayList<Object>> toReduce : combineReducers()){ //merge the reducers into a single key/value(list) and iterate over them
                     cons.newInstance(toReduce.getKey(), toReduce.getValue(), finalContext);
                 }
             } else {
@@ -162,9 +159,8 @@ class Job {
         assignChunksToMappers(); //push everything into mapper array
         runMappers(); //run all mappers in mapper array
         shuffle();//shuffle mappers around, will produce different ordering
-        assignMappersToReducers();
         runReducers();
-        merge();
+        reduce();
         output();
         System.out.println(getTime() + " Completed Job: " + "'" + config.getJobName() + "'" + " to "
                 + config.getOutputPath() + " in " + (System.currentTimeMillis() - now)
