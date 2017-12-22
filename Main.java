@@ -32,7 +32,7 @@ class Main {
             if (str[0].matches("[A-Z]{3,20}") && str[1].matches("[A-Z]{3}") && str[2].matches("[0-9]{1,3}\\.[0-9]{3,13}") && str[3].matches("[0-9]{1,3}\\.[0-9]{3,13}")) {
                 context.write(str[1], new AirportData(str[0], str[2], str[3]));
             }
-            if (str[0].matches("[A-Z]{3}[0-9]{4}[A-Z]{2}[0-9]{1}") && str[1].matches("[A-Z]{3}[0-9]{4}[A-Z]{1}") && str[2].matches("[A-Z]{3}") && str[3].matches("[A-Z]{3}") && str[4].matches("[0-9]{10}") && str[5].matches("[0-9]{1,4}")) {
+            if (str[0].matches("[A-Z]{3}[0-9]{4}[A-Z]{2}[0-9]") && str[1].matches("[A-Z]{3}[0-9]{4}[A-Z]") && str[2].matches("[A-Z]{3}") && str[3].matches("[A-Z]{3}") && str[4].matches("[0-9]{10}") && str[5].matches("[0-9]{1,4}")) {
                 context.write(str[1], new Flight(str[1], str[0], str[2], str[3], str[4], str[5]));
                 context.write(str[2], str[1]); //key is airport ffa code, value is flight ID
             }
@@ -42,20 +42,14 @@ class Main {
     public static class reduce {
         public reduce(Object key, Iterable<Object> values, Context context) {
             
-            if (key.toString().matches("[A-Z]{3}[0-9]{4}[A-Z]{1}")) {
+            if (key.toString().matches("[A-Z]{3}[0-9]{4}[A-Z]")) {
                 int passengers = 0;
                 flightConcat.setLength(0);
 
                 for (Object val : values) {
                     if (val instanceof Flight) {
                         Flight flightData = (Flight) val;
-                        flightConcat.append("\n" + "FLIGHT ID: ").append(flightData.getFlightID()).append("\n")
-                                    .append("FROM: ").append(flightData.getFrom()).append("\n").append("TO: ")
-                                    .append(flightData.getTo()).append("\n").append("DEPARTURE TIME: ")
-                                    .append(flightData.getDepartTime()).append("\n").append("FLIGHT TIME (M): ")
-                                    .append(flightData.getFlightTime()).append("\n").append("ARRIVAL TIME: ")
-                                    .append(flightData.getArrivalTime()).append("\n").append("PASSENGER ID: ")
-                                    .append(flightData.getPassengerID()).append("\n");
+                        flightConcat.append("\n" + "FLIGHT ID: ").append(flightData.getFlightID()).append("\n").append("FROM: ").append(flightData.getFrom()).append("\n").append("TO: ").append(flightData.getTo()).append("\n").append("DEPARTURE TIME: ").append(flightData.getDepartTime()).append("\n").append("FLIGHT TIME (M): ").append(flightData.getFlightTime()).append("\n").append("ARRIVAL TIME: ").append(flightData.getArrivalTime()).append("\n").append("PASSENGER ID: ").append(flightData.getPassengerID()).append("\n");
                         passengers++;
                     }
                 }
@@ -70,9 +64,7 @@ class Main {
                 for (Object val : values) {
                     if (val instanceof AirportData) {
                         AirportData airportInfo = (AirportData) val;
-                        airport = "AIRPORT NAME: " + airportInfo.getName() + "\n"
-                                + "AIRPORT LATITUDE: " + airportInfo.getLatitude() + "\n"
-                                + "AIRPORT LONGITUDE: " + airportInfo.getLongitude() + "\n";
+                        airport = "AIRPORT NAME: " + airportInfo.getName() + "\n" + "AIRPORT LATITUDE: " + airportInfo.getLatitude() + "\n" + "AIRPORT LONGITUDE: " + airportInfo.getLongitude() + "\n";
                     }else{
                         tempArrayList.add(val);//it's a flight ID
                     }
