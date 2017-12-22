@@ -25,7 +25,9 @@ class Mapper {
         for(String chunk : singleChunk) {
             try {
                 cons.newInstance(chunk, context);//Invoke the map method with each string (line) and the context
-            } catch (Exception ignored) {}
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 }

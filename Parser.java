@@ -10,13 +10,12 @@ import java.util.ArrayList;
 class Parser {
     private final ArrayList<ArrayList<String>> chunks = new ArrayList<>();
     private final String filepath;
-    private int CHUNK_SIZE = 2048; //default chunk size
+    private final int CHUNK_SIZE; //default chunk size
 
     Parser(String path, int size){
         this.filepath = path;
         this.CHUNK_SIZE = size;
     }
-
     /**
      * Return the list of chunks to delegate to mappers
      */
@@ -36,7 +35,7 @@ class Parser {
             String line;
 
             while ((line = f.readLine()) != null ){
-                if(line.length() > 0) {
+                if(line.trim().length() > 0) {
                     if (counter != CHUNK_SIZE) {
                         tempStorage.add(line);
                         counter++;

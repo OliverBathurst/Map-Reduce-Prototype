@@ -11,7 +11,6 @@ class Config {
     private boolean multiThreaded = false, shuffle = false;
     private Class reduce, map;
     private String jobName, output;
-
     @SuppressWarnings("SameParameterValue")
     void setShuffle(boolean b){
         shuffle = b;

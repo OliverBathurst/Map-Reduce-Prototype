@@ -9,7 +9,7 @@ import java.util.Collections;
 
 class Reducer {
     private final ArrayList<Pair<Object, ArrayList<Object>>> pairs = new ArrayList<>();
-    private ArrayList<Pair<Object, Object>> fromMapper = null;
+    private final ArrayList<Pair<Object, Object>> fromMapper;
 
     Reducer(ArrayList<Pair<Object, Object>> map){
         this.fromMapper = map;
@@ -25,9 +25,9 @@ class Reducer {
             boolean contains = false;
             for (Pair<Object, ArrayList<Object>> pair : pairs) {
                 if (pair.getKey().equals(pairsFromContext.getKey())) {
-                    pair.getValue().add(pairsFromContext.getValue());//if it already exists add it's value to its list
-                    contains = true; //if it contains it
-                    break;
+                    pair.getValue().add(pairsFromContext.getValue());//if it already exists add its value to the list
+                    contains = true; //set flag that it has been found (the key)
+                    break; //the key has been found in the reduced list, no need for further processing
                 }
             }
             if (!contains) {

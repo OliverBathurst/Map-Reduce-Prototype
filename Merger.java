@@ -1,6 +1,5 @@
 import javafx.util.Pair;
 import java.util.ArrayList;
-import java.util.Collections;
 
 /**
  * Created by Oliver on 18/11/2017.
@@ -12,7 +11,7 @@ class Merger {
 
     @SuppressWarnings("unchecked")
     Merger(ArrayList<Reducer> reducerList){
-        for(Reducer reduce : reducerList){
+        for(Reducer reduce : reducerList) {
             for (Pair<Object, ArrayList<Object>> reduced : reduce.returnReduced()) { //loop through reducers
                 boolean contains = false;
                 for (Pair<Object, ArrayList<Object>> pair : pairs) {
@@ -23,7 +22,7 @@ class Merger {
                     }
                 }
                 if (!contains) {
-                    pairs.add(new Pair(reduced.getKey(), new ArrayList<>(Collections.singletonList(reduced.getValue()))));
+                    pairs.add(new Pair(reduced.getKey(), reduced.getValue()));
                 }
             }
         }

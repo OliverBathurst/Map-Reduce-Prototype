@@ -34,7 +34,7 @@ class Main {
             }
             if (str[0].matches("[A-Z]{3}[0-9]{4}[A-Z]{2}[0-9]{1}") && str[1].matches("[A-Z]{3}[0-9]{4}[A-Z]{1}") && str[2].matches("[A-Z]{3}") && str[3].matches("[A-Z]{3}") && str[4].matches("[0-9]{10}") && str[5].matches("[0-9]{1,4}")) {
                 context.write(str[1], new Flight(str[1], str[0], str[2], str[3], str[4], str[5]));
-                context.write(str[2],str[1]); //key is airport ffa code, value is flight ID
+                context.write(str[2], str[1]); //key is airport ffa code, value is flight ID
             }
         }
     }
@@ -47,14 +47,16 @@ class Main {
                 flightConcat.setLength(0);
 
                 for (Object val : values) {
-                    if (val instanceof ArrayList) {
-                        for (Object flight : (ArrayList) val) {
-                            if (flight instanceof Flight) {
-                                Flight flightData = (Flight) flight;
-                                flightConcat.append("\n" + "FLIGHT ID: ").append(flightData.getFlightID()).append("\n").append("FROM: ").append(flightData.getFrom()).append("\n").append("TO: ").append(flightData.getTo()).append("\n").append("DEPARTURE TIME: ").append(flightData.getDepartTime()).append("\n").append("FLIGHT TIME (M): ").append(flightData.getFlightTime()).append("\n").append("ARRIVAL TIME: ").append(flightData.getArrivalTime()).append("\n").append("PASSENGER ID: ").append(flightData.getPassengerID()).append("\n");
-                                passengers++;
-                            }
-                        }
+                    if (val instanceof Flight) {
+                        Flight flightData = (Flight) val;
+                        flightConcat.append("\n" + "FLIGHT ID: ").append(flightData.getFlightID()).append("\n")
+                                    .append("FROM: ").append(flightData.getFrom()).append("\n").append("TO: ")
+                                    .append(flightData.getTo()).append("\n").append("DEPARTURE TIME: ")
+                                    .append(flightData.getDepartTime()).append("\n").append("FLIGHT TIME (M): ")
+                                    .append(flightData.getFlightTime()).append("\n").append("ARRIVAL TIME: ")
+                                    .append(flightData.getArrivalTime()).append("\n").append("PASSENGER ID: ")
+                                    .append(flightData.getPassengerID()).append("\n");
+                        passengers++;
                     }
                 }
                 context.write(key, flightConcat.toString());
@@ -66,17 +68,13 @@ class Main {
                 tempHashSet.clear();
                 String airport = "";
                 for (Object val : values) {
-                    if (val instanceof ArrayList) {
-                        for (Object air : (ArrayList) val) {
-                            if (air instanceof AirportData) {
-                                AirportData airportInfo = (AirportData) air;
-                                airport = "AIRPORT NAME: " + airportInfo.getName() + "\n"
-                                        + "AIRPORT LATITUDE: " + airportInfo.getLatitude() + "\n"
-                                        + "AIRPORT LONGITUDE: " + airportInfo.getLongitude() + "\n";
-                            }else{
-                                tempArrayList.add(air);//it's a flight ID
-                            }
-                        }
+                    if (val instanceof AirportData) {
+                        AirportData airportInfo = (AirportData) val;
+                        airport = "AIRPORT NAME: " + airportInfo.getName() + "\n"
+                                + "AIRPORT LATITUDE: " + airportInfo.getLatitude() + "\n"
+                                + "AIRPORT LONGITUDE: " + airportInfo.getLongitude() + "\n";
+                    }else{
+                        tempArrayList.add(val);//it's a flight ID
                     }
                 }
                 tempHashSet.addAll(tempArrayList);
