@@ -19,7 +19,7 @@ class Parser {
     /**
      * Return the list of chunks to delegate to mappers
      */
-    ArrayList<ArrayList<String>> returnMap(){
+    ArrayList<ArrayList<String>> returnChunks(){
         return chunks;
     }
 
@@ -30,11 +30,11 @@ class Parser {
     void run(){
         try {
             ArrayList<String> tempStorage = new ArrayList<>(CHUNK_SIZE);
-            int counter = 0;
+
             BufferedReader f = new BufferedReader(new FileReader(filepath));
             String line;
-
-            while ((line = f.readLine()) != null ){
+            int counter = 0;
+            while ((line = f.readLine()) != null){
                 if(line.trim().length() > 0) {
                     if (counter != CHUNK_SIZE) {
                         tempStorage.add(line);
@@ -46,11 +46,11 @@ class Parser {
                     }
                 }
             }
-
             if (tempStorage.size() > 0){ //if there's any lines left in storage
                 chunks.add(new ArrayList<>(tempStorage)); //create last chunk and add it
             }
             tempStorage.clear();
+
         }catch(Exception e){
             System.out.println("EXCEPTION: \n" + e.getMessage());
         }

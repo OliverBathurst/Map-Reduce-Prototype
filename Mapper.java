@@ -1,3 +1,5 @@
+import javafx.util.Pair;
+
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 
@@ -17,8 +19,8 @@ class Mapper {
         this.cons = constructor;
     }
 
-    Context returnMap(){
-        return context;
+    ArrayList<Pair<Object, Object>> getIntermediateOutput(){
+        return context.getMap();
     }
 
     void run(){

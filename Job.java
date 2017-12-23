@@ -2,7 +2,6 @@ import javafx.util.Pair;
 import java.io.File;
 import java.io.FileWriter;
 import java.lang.reflect.Constructor;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -12,14 +11,14 @@ import java.util.concurrent.*;
  */
 
 class Job {
-    private final SimpleDateFormat LOG_TIME = new SimpleDateFormat("HH:mm:ss");
+    private ExecutorService service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
     private final ArrayList<Mapper> mappers = new ArrayList<>();
     private final ArrayList<Reducer> reducers = new ArrayList<>();
     private final ArrayList<Parser> parsers = new ArrayList<>();
-    private final int threadCount = Runtime.getRuntime().availableProcessors();
-    private final Context finalContext = new Context();
+    private final ArrayList<Combiner> combiners = new ArrayList<>();
+    private final Logger logger = new Logger();
     private final Config config;
-    private ExecutorService service = Executors.newFixedThreadPool(threadCount);
+    private long startTime;
 
     Job(Config conf){
         this.config = conf;
@@ -29,32 +28,39 @@ class Job {
      * Takes the input path from the config and runs the parser, with a chunk size (defaults to 128)
      */
     private void parse(){
-        System.out.println(getTime() + " Running Parser...");
-        for(String str: config.getInputPaths()) { //get input files
-            System.out.println(getTime() + " Reading from: " + str);
-            parsers.add(new Parser(str, config.getChunkSize()));
+        logger.log("Running Parser...");
+        for(String filepath: config.getInputPaths()) { //get input files
+            parsers.add(new Parser(filepath, config.getChunkSize()));
         }
-        for(Parser p: parsers){
-            p.run(); //run the parsers
+        if(config.getMultiThreaded()){
+            setupThreadPool();
+            for (Parser p : parsers) {
+                service.execute(p::run); //run the parsers
+            }
+            shutdownThreadPool();
+        }else{
+            for (Parser p : parsers) {
+                p.run(); //run the parsers
+            }
         }
     }
     @SuppressWarnings("unchecked")
     private void assignChunksToMappers(){
-        try {
-            if (config.getMapper() != null) {
+        if (config.getMapper() != null) {
+            try {
                 Constructor<?> cons = config.getMapper().getConstructor(String.class, Context.class);
-                System.out.println(getTime() + " Found map method...");
-                for(Parser p: parsers) {
-                    for (ArrayList<String> chunk : p.returnMap()) {
+                logger.log("Found map method...");
+                for(Parser parser: parsers) {
+                    for (ArrayList<String> chunk : parser.returnChunks()) {
                         mappers.add(new Mapper(chunk, new Context(), cons)); //give each chunk to a different mapper with a new context
                     }
                 }
-                System.out.println(getTime() + " Mappers: " + mappers.size());
-            } else {
-                System.out.println(getTime() + " Mapper method 'mapper' not defined\n" + "use config.setMapper(class);");//no map method found
+                logger.log("Mappers: " + mappers.size());
+            }catch(Exception e) {
+                logger.logCritical("Other error: " + e.getMessage() + " cause: " + e.getCause());
             }
-        }catch(Exception e) {
-            System.out.println(getTime() + " Other error: " + e.getMessage() + " cause: " + e.getCause());
+        } else {
+            logger.log("Mapper method 'mapper' not defined\n" + "use config.setMapper(class);");
         }
     }
     /**
@@ -62,75 +68,50 @@ class Job {
      */
     private void runMappers(){
         if(config.getMultiThreaded()) {
-            System.out.println(getTime() + " Thread count: " + threadCount);
+            setupThreadPool();
             for (Mapper map : mappers) {
                 service.execute(map::run);
             }
-            service.shutdown();
-            try {
-                service.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            shutdownThreadPool();
         }else{
             for(Mapper map: mappers){
                 map.run();
             }
         }
     }
+    private void combine(){
+        Combine grouper = new Combine(mappers, combiners);
+        grouper.combine();
+    }
     /**
-     * shuffle the mappers around before reducing them
+     * "The process of bringing intermediate output to a set
+     * of Reducers is known as the ‘shuffling’ process"
      */
-    private void shuffle(){
-        if(config.getShuffle()) {
-            Collections.shuffle(mappers);
+    private void partition(){
+        for(Mapper mapper: mappers){
+            reducers.add(new Reducer(mapper.getIntermediateOutput()));
         }
     }
     /**
      * runs each reducer in order
      */
     private void runReducers(){
-        for(Mapper map: mappers){
-            reducers.add(new Reducer(map.returnMap().getMap()));
-        }
         if(config.getMultiThreaded()) {
-            if(service.isShutdown()){
-                service = Executors.newFixedThreadPool(threadCount);
-            }
-            System.out.println(getTime() + " Thread count: " + threadCount);
+            setupThreadPool();
             for (Reducer r : reducers) {
                 service.execute(r::reduce);
             }
-            service.shutdown();
-            try {
-                service.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            shutdownThreadPool();
         }else{
             for(Reducer r: reducers){
                 r.reduce();
             }
         }
     }
-    private ArrayList<Pair<Object, ArrayList<Object>>> combineReducers(){
-        return new Merger(reducers).returnFinalPairs();
-    }
-    @SuppressWarnings({"unchecked", "unused"})
-    private void reduce(){
-        try{
-            if (config.getReducer() != null) {
-                Constructor cons = config.getReducer().getConstructor(Object.class, Iterable.class, Context.class);
-                for(Pair<Object, ArrayList<Object>> toReduce : combineReducers()){ //merge the reducers into a single key/value(list) and iterate over them
-                    cons.newInstance(toReduce.getKey(), toReduce.getValue(), finalContext);
-                }
-            } else {
-                System.out.println(getTime() + " Reducer method 'reduce' not defined\n" +
-                        "use config.setReducer(class);");//no reduce method found
-            }
-        }catch(Exception e){
-            System.out.println(getTime() + " Other error: " + e.getMessage() + " cause: " + e.getCause());
-        }
+    private ArrayList<Pair<Object, Object>> getFinalKeyPairs(){
+        FinalKeyPairs fkp = new FinalKeyPairs(config, new Merger(reducers).returnFinalPairs());
+        fkp.run();
+        return fkp.getFinalOutput();
     }
     /**
      * This is the output, writes every key/value pair to file, this is the final step
@@ -138,38 +119,55 @@ class Job {
     @SuppressWarnings("unchecked")
     private void output(){
         try {
-            System.out.println(getTime() + " Writing to file...");
+            logger.log("Writing to file...");
             FileWriter fw = new FileWriter(new File(config.getOutputPath())); //get the stored output path
-            System.out.println(getTime() + " Reduced set size: " + finalContext.getMap().size());
-            for (Pair<Object, Object> objectEntry : finalContext.getMap()) {
+
+            ArrayList<Pair<Object, Object>> finalKeyValuePairs = getFinalKeyPairs();
+            logger.log("Reduced set size: " + finalKeyValuePairs.size());
+            for (Pair<Object, Object> objectEntry : finalKeyValuePairs) {
                 fw.write("Key: " + objectEntry.getKey() + " Value: " + objectEntry.getValue() + "\n");
             }
             fw.flush();
             fw.close();
         }catch(Exception e){
-            System.out.println(getTime() + " Cause: " + e.getCause() + " Message: " + e.getMessage());
+            logger.logCritical("Cause: " + e.getCause() + " Message: " + e.getMessage());
         }
     }
     /**
      * This is the driver, performs all actions in order
      */
     void runJob(){
-        long now = System.currentTimeMillis();
+        setStartTime(System.currentTimeMillis());
+
         parse(); //parse input data into chunks
         assignChunksToMappers(); //push everything into mapper array
         runMappers(); //run all mappers in mapper array
-        shuffle();//shuffle mappers around, will produce different ordering
+        combine();
+        partition();//assign mappers IO to reducers
         runReducers();
-        reduce();
         output();
-        System.out.println(getTime() + " Completed Job: " + "'" + config.getJobName() + "'" + " to "
-                + config.getOutputPath() + " in " + (System.currentTimeMillis() - now)
+
+        logger.log("Completed Job: " + "'" + config.getJobName() + "'" + " to "
+                + config.getOutputPath() + " in " + (System.currentTimeMillis() - getStartTime())
                 + "ms");
     }
-    /**
-     * Get current time for logging
-     */
-    private String getTime(){
-        return LOG_TIME.format(new Date());
+    private void setupThreadPool(){
+        if(service.isShutdown()){
+            service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        }
+    }
+    private void shutdownThreadPool() {
+        service.shutdown();
+        try {
+            service.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        } catch (InterruptedException e) {
+            logger.log(e.getMessage());
+        }
+    }
+    private void setStartTime(long l){
+        startTime = l;
+    }
+    private long getStartTime(){
+        return startTime;
     }
 }
