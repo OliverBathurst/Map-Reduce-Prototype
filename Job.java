@@ -17,6 +17,7 @@ class Job {
     private final ArrayList<Parser> parsers = new ArrayList<>();
     private final ArrayList<Combiner> combiners = new ArrayList<>();
     private final Logger logger = new Logger();
+    private final Context c = new Context();
     private final Config config;
     private long startTime;
 
@@ -52,7 +53,7 @@ class Job {
                 logger.log("Found map method...");
                 for(Parser parser: parsers) {
                     for (ArrayList<String> chunk : parser.returnChunks()) {
-                        mappers.add(new Mapper(chunk, new Context(), cons)); //give each chunk to a different mapper with a new context
+                        mappers.add(new Mapper(chunk, cons)); //give each chunk to a different mapper with a new context
                     }
                 }
                 logger.log("Mappers: " + mappers.size());
@@ -80,16 +81,17 @@ class Job {
         }
     }
     private void combine(){
-        Combine grouper = new Combine(mappers, combiners);
-        grouper.combine();
+        for (Mapper map : mappers) {
+            new Combine(map, combiners).combine();
+        }
     }
     /**
      * "The process of bringing intermediate output to a set
      * of Reducers is known as the ‘shuffling’ process"
      */
     private void partition(){
-        for(Mapper mapper: mappers){
-            reducers.add(new Reducer(mapper.getIntermediateOutput()));
+        for (Combiner c : combiners) {
+            reducers.add(new Reducer(c.getBuffer())); //give grouped intermediate key value pairs to reducer
         }
     }
     /**
@@ -108,23 +110,34 @@ class Job {
             }
         }
     }
-    private ArrayList<Pair<Object, Object>> getFinalKeyPairs(){
-        FinalKeyPairs fkp = new FinalKeyPairs(config, new Merger(reducers).returnFinalPairs());
-        fkp.run();
-        return fkp.getFinalOutput();
+    @SuppressWarnings("unchecked")
+    private void sendReducedToReduceMethod(){
+        if (config.getReducer() != null) {
+            try{
+                Constructor cons = config.getReducer().getConstructor(Object.class, Iterable.class, Context.class);
+                for(Reducer r: reducers) {
+                    for (Pair<Object, ArrayList<Object>> toReduce : r.returnReduced()) { //merge the reducers into a single key/value(list) and iterate over them
+                        cons.newInstance(toReduce.getKey(), toReduce.getValue(), c);
+                    }
+                }
+            }catch(Exception e){
+                logger.logCritical("Error: " + e.getMessage() + " cause: " + e.getCause());
+            }
+        } else {
+            logger.log("Reducer method 'reduce' not defined\n" +
+                    "use config.setReducer(class);");
+        }
     }
     /**
      * This is the output, writes every key/value pair to file, this is the final step
      */
     @SuppressWarnings("unchecked")
-    private void output(){
+    private void OutputWriter(){
         try {
             logger.log("Writing to file...");
             FileWriter fw = new FileWriter(new File(config.getOutputPath())); //get the stored output path
-
-            ArrayList<Pair<Object, Object>> finalKeyValuePairs = getFinalKeyPairs();
-            logger.log("Reduced set size: " + finalKeyValuePairs.size());
-            for (Pair<Object, Object> objectEntry : finalKeyValuePairs) {
+            logger.log("Reduced set size: " + c.getMap().size());
+            for (Pair<Object, Object> objectEntry : c.getMap()) {
                 fw.write("Key: " + objectEntry.getKey() + " Value: " + objectEntry.getValue() + "\n");
             }
             fw.flush();
@@ -145,10 +158,11 @@ class Job {
         combine();
         partition();//assign mappers IO to reducers
         runReducers();
-        output();
+        sendReducedToReduceMethod();
+        OutputWriter();
 
         logger.log("Completed Job: " + "'" + config.getJobName() + "'" + " to "
-                + config.getOutputPath() + " in " + (System.currentTimeMillis() - getStartTime())
+                + config.getOutputPath() + " in " + getElapsed()
                 + "ms");
     }
     private void setupThreadPool(){
@@ -167,7 +181,7 @@ class Job {
     private void setStartTime(long l){
         startTime = l;
     }
-    private long getStartTime(){
-        return startTime;
+    private long getElapsed(){
+        return System.currentTimeMillis() - startTime;
     }
 }

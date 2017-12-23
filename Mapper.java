@@ -9,13 +9,12 @@ import java.util.ArrayList;
  */
 
 class Mapper {
+    private final Context context = new Context();
     private final ArrayList<String> singleChunk;
-    private final Context context;
     private final Constructor<?> cons;
 
-    Mapper(ArrayList<String> chunk, Context c, Constructor<?> constructor){
+    Mapper(ArrayList<String> chunk, Constructor<?> constructor){
         this.singleChunk = chunk;
-        this.context = c;
         this.cons = constructor;
     }
 

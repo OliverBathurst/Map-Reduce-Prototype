@@ -8,16 +8,9 @@ import java.util.ArrayList;
 class Config {
     private final ArrayList<String> inputFiles = new ArrayList<>();
     private int CHUNK_SIZE = 128;
-    private boolean multiThreaded = false, shuffle = false;
+    private boolean multiThreaded = false;
     private Class reduce, map;
     private String jobName, output;
-    @SuppressWarnings("SameParameterValue")
-    void setShuffle(boolean b){
-        shuffle = b;
-    }
-    boolean getShuffle(){
-        return shuffle;
-    }
     @SuppressWarnings("SameParameterValue")
     void setMultiThreaded(boolean b){
         multiThreaded = b;

@@ -8,22 +8,22 @@ import java.util.Collections;
  */
 
 class Reducer {
-    private final ArrayList<Pair<Object, ArrayList<Object>>> pairs = new ArrayList<>();
-    private final ArrayList<Pair<Object, Object>> fromMapper;
+    private final ArrayList<Pair<Object, ArrayList<Object>>> reducedKeyValuePairs = new ArrayList<>();
+    private final ArrayList<Pair<Object, Object>> intermediateKeys;
 
     Reducer(ArrayList<Pair<Object, Object>> map){
-        this.fromMapper = map;
+        this.intermediateKeys = map;
     }
 
     ArrayList<Pair<Object, ArrayList<Object>>> returnReduced(){
-        return pairs;
+        return reducedKeyValuePairs;
     }
 
     @SuppressWarnings("unchecked")
     void reduce(){
-        for(Pair<Object, Object> pairsFromContext : fromMapper){
+        for(Pair<Object, Object> pairsFromContext : intermediateKeys){
             boolean contains = false;
-            for (Pair<Object, ArrayList<Object>> pair : pairs) {
+            for (Pair<Object, ArrayList<Object>> pair : reducedKeyValuePairs) {
                 if (pair.getKey().equals(pairsFromContext.getKey())) {
                     pair.getValue().add(pairsFromContext.getValue());//if it already exists add its value to the list
                     contains = true; //set flag that it has been found (the key)
@@ -31,7 +31,7 @@ class Reducer {
                 }
             }
             if (!contains) {
-                pairs.add(new Pair(pairsFromContext.getKey(), new ArrayList(Collections.singletonList(pairsFromContext.getValue()))));
+                reducedKeyValuePairs.add(new Pair(pairsFromContext.getKey(), new ArrayList(Collections.singletonList(pairsFromContext.getValue()))));
             }
         }
     }

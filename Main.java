@@ -21,7 +21,6 @@ class Main {
         newConfig.addInputPath(args[1]); //add as many input paths as you want
         newConfig.addOutputPath(args[2]);
         //newConfig.setChunkSize(256);//not really needed, alter based on file size
-        newConfig.setShuffle(false);
         newConfig.setMultiThreaded(true); //multithreading is slower in this instance
         new Job(newConfig).runJob();
     }

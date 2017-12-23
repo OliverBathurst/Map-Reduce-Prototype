@@ -2,7 +2,7 @@ import javafx.util.Pair;
 import java.util.ArrayList;
 
 class Combiner {
-    private ArrayList<Pair<Object,Object>> groupedKeys = new ArrayList<>();
+    private final ArrayList<Pair<Object,Object>> groupedKeys = new ArrayList<>();
 
     Combiner(){}
 
