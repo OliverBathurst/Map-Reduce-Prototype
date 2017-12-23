@@ -7,15 +7,17 @@ import java.util.ArrayList;
  * this checking is done in the Combiner class.
  */
 class GroupedValuesList {
-    private final ArrayList<Pair<Object,Object>> groupedKeys = new ArrayList<>();
+    private final Pair<Object, ArrayList<Object>> groupedValues;
 
-    GroupedValuesList(){}
-
-    void add(Pair<Object,Object> pair){
-        groupedKeys.add(pair);
+    GroupedValuesList(Object key){
+        groupedValues = new Pair<>(key, new ArrayList<>());
     }
 
-    ArrayList<Pair<Object,Object>> getBuffer(){
-        return groupedKeys;
+    void add(Object pairValue){
+        groupedValues.getValue().add(pairValue);
+    }
+
+    Pair<Object, ArrayList<Object>> getList(){
+        return groupedValues;
     }
 }

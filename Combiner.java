@@ -32,16 +32,14 @@ class Combiner {
     private void checkBuffers(Pair<Object, Object> keyPairValue){
         boolean contains = false;
         for (GroupedValuesList c : groupedValuesLists) {
-            for (int z = 0; z < c.getBuffer().size(); z++) {
-                if (c.getBuffer().get(z).getKey().equals(keyPairValue.getKey())) {
-                    c.add(keyPairValue);
-                    contains = true;
-                    break;
-                }
+            if (c.getList().getKey().equals(keyPairValue.getKey())) {
+                c.add(keyPairValue.getValue());
+                contains = true;
+                break;
             }
         }
         if(!contains){
-            groupedValuesLists.add(new GroupedValuesList() {{ add(keyPairValue); }});
+            groupedValuesLists.add(new GroupedValuesList(keyPairValue.getKey()) {{ add(keyPairValue.getValue()); }});
         }
     }
 }

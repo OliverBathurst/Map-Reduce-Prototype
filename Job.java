@@ -1,4 +1,3 @@
-import javafx.util.Pair;
 import java.lang.reflect.Constructor;
 import java.util.*;
 import java.util.concurrent.*;
@@ -10,12 +9,11 @@ import java.util.concurrent.*;
 
 class Job {
     private ExecutorService service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-    private final ArrayList<GroupedValuesList> groupedKeys = new ArrayList<>();
+    private final ArrayList<GroupedValuesList> groupedValues = new ArrayList<>();
     private final ArrayList<Mapper> mappers = new ArrayList<>();
     private final ArrayList<Reducer> reducers = new ArrayList<>();
     private final ArrayList<InputReader> inputReaders = new ArrayList<>();
     private final Logger logger = new Logger();
-    private final Context c = new Context();
     private final Config config;
     private long startTime;
 
@@ -84,15 +82,15 @@ class Job {
      */
     private void combine(){
         for (Mapper map : mappers) {
-            new Combiner(map.getIntermediateOutput(), groupedKeys).combine();//pass intermediate keys and grouped key storage
+            new Combiner(map.getIntermediateOutput(), groupedValues).combine();//pass intermediate keys and grouped key storage
         }
     }
     /**
      *
      */
     private void partition(){
-        for (GroupedValuesList groupedValuesList : groupedKeys) {
-            reducers.add(new Reducer(groupedValuesList.getBuffer())); //give grouped intermediate key value pairs to reducer
+        for (GroupedValuesList groupedValuesList : groupedValues) {
+            reducers.add(new Reducer(groupedValuesList.getList(), config)); //give grouped intermediate key value pairs to reducer
         }
     }
     /**
@@ -111,24 +109,6 @@ class Job {
             }
         }
     }
-    @SuppressWarnings("unchecked")
-    private void sendReducedToReduceMethod(){
-        if (config.getReducer() != null) {
-            try{
-                Constructor cons = config.getReducer().getConstructor(Object.class, Iterable.class, Context.class);
-                for(Reducer r: reducers) {
-                    for (Pair<Object, ArrayList<Object>> toReduce : r.returnReduced()) { //merge the reducers into a single key/value(list) and iterate over them
-                        cons.newInstance(toReduce.getKey(), toReduce.getValue(), c);
-                    }
-                }
-            }catch(Exception e){
-                logger.logCritical("Error: " + e.getMessage() + " cause: " + e.getCause());
-            }
-        } else {
-            logger.log("Reducer method 'reduce' not defined\n" +
-                    "use config.setReducer(class);");
-        }
-    }
     /**
      * This is the output, writes every key/value pair to file, this is the final step
      */
@@ -136,8 +116,12 @@ class Job {
     private void output(){
         OutputWriter out = new OutputWriter();
         out.setFilepath(config.getOutputPath());
-        out.setContext(c);
-        out.write();
+        out.prepare();
+        for(Reducer r: reducers){
+            out.setContext(r.getFinalKeyPairContext());
+            out.write();
+        }
+        out.closeOutput();
     }
     /**
      * This is the driver, performs all actions in order
@@ -151,7 +135,6 @@ class Job {
         combine();
         partition();//assign mappers IO to reducers
         runReducers();
-        sendReducedToReduceMethod();
         output();
 
         logger.log("Completed Job: " + "'" + config.getJobName() + "'" + " to "

@@ -1,6 +1,6 @@
 import javafx.util.Pair;
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
-import java.util.Collections;
 
 /**
  * Created by Oliver on 18/11/2017.
@@ -8,31 +8,30 @@ import java.util.Collections;
  */
 
 class Reducer {
-    private final ArrayList<Pair<Object, ArrayList<Object>>> reducedKeyValuePairs = new ArrayList<>();
-    private final ArrayList<Pair<Object, Object>> intermediateKeys;
+    private final Pair<Object, ArrayList<Object>> keyListValue;
+    private final Logger logger = new Logger();
+    private final Context finalContext = new Context();
+    private final Config c;
 
-    Reducer(ArrayList<Pair<Object, Object>> map){
-        this.intermediateKeys = map;
+    Reducer(Pair<Object, ArrayList<Object>> pair, Config config){
+        this.keyListValue = pair;
+        this.c = config;
     }
-
-    ArrayList<Pair<Object, ArrayList<Object>>> returnReduced(){
-        return reducedKeyValuePairs;
-    }
-
     @SuppressWarnings("unchecked")
     void reduce(){
-        for(Pair<Object, Object> pairsFromContext : intermediateKeys){
-            boolean contains = false;
-            for (Pair<Object, ArrayList<Object>> pair : reducedKeyValuePairs) {
-                if (pair.getKey().equals(pairsFromContext.getKey())) {
-                    pair.getValue().add(pairsFromContext.getValue());//if it already exists add its value to the list
-                    contains = true; //set flag that it has been found (the key)
-                    break; //the key has been found in the reduced list, no need for further processing
-                }
+        if (c.getReducer() != null) {
+            try{
+                Constructor cons = c.getReducer().getConstructor(Object.class, Iterable.class, Context.class);
+                cons.newInstance(keyListValue.getKey(), keyListValue.getValue(), finalContext);
+            }catch(Exception e){
+                logger.logCritical("Error: " + e.getMessage() + " cause: " + e.getCause());
             }
-            if (!contains) {
-                reducedKeyValuePairs.add(new Pair(pairsFromContext.getKey(), new ArrayList(Collections.singletonList(pairsFromContext.getValue()))));
-            }
+        } else {
+            logger.logCritical("Reducer method 'reduce' not defined\n" +
+                    "use config.setReducer(class);");
         }
+    }
+    Context getFinalKeyPairContext(){
+        return finalContext;
     }
 }
