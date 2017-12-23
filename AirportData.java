@@ -3,7 +3,9 @@
  * Written by Oliver Bathurst <oliverbathurst12345@gmail.com>
  */
 
-@SuppressWarnings("unused")
+/**
+ * An AirportData object stores information about a given airport
+ */
 class AirportData {
     private final String name, latitude, longitude;
 

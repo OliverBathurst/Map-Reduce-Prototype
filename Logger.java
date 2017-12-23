@@ -1,6 +1,9 @@
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+/**
+ * This class logs down the time along with debug information
+ */
 class Logger {
     private final SimpleDateFormat LOG_TIME = new SimpleDateFormat("HH:mm:ss");
 

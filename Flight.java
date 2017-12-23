@@ -6,6 +6,9 @@ import java.util.Date;
  * Written by Oliver Bathurst <oliverbathurst12345@gmail.com>
  */
 
+/**
+ * A Flight object stores information about a flight to be retrieved in the Reduce method
+ */
 @SuppressWarnings("unused")
 class Flight {
     private final String passengerID, fromAirport, toAirport, flightTime, flightID;

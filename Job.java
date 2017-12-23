@@ -1,6 +1,4 @@
 import javafx.util.Pair;
-import java.io.File;
-import java.io.FileWriter;
 import java.lang.reflect.Constructor;
 import java.util.*;
 import java.util.concurrent.*;
@@ -12,10 +10,10 @@ import java.util.concurrent.*;
 
 class Job {
     private ExecutorService service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+    private final ArrayList<GroupedValuesList> groupedKeys = new ArrayList<>();
     private final ArrayList<Mapper> mappers = new ArrayList<>();
     private final ArrayList<Reducer> reducers = new ArrayList<>();
-    private final ArrayList<Parser> parsers = new ArrayList<>();
-    private final ArrayList<Combiner> combiners = new ArrayList<>();
+    private final ArrayList<InputReader> inputReaders = new ArrayList<>();
     private final Logger logger = new Logger();
     private final Context c = new Context();
     private final Config config;
@@ -28,20 +26,20 @@ class Job {
     /**
      * Takes the input path from the config and runs the parser, with a chunk size (defaults to 128)
      */
-    private void parse(){
-        logger.log("Running Parser...");
+    private void reader(){
+        logger.log("Running InputReader...");
         for(String filepath: config.getInputPaths()) { //get input files
-            parsers.add(new Parser(filepath, config.getChunkSize()));
+            inputReaders.add(new InputReader(filepath, config.getChunkSize()));
         }
         if(config.getMultiThreaded()){
             setupThreadPool();
-            for (Parser p : parsers) {
-                service.execute(p::run); //run the parsers
+            for (InputReader p : inputReaders) {
+                service.execute(p::run); //run the inputReaders
             }
             shutdownThreadPool();
         }else{
-            for (Parser p : parsers) {
-                p.run(); //run the parsers
+            for (InputReader p : inputReaders) {
+                p.run(); //run the inputReaders
             }
         }
     }
@@ -51,8 +49,8 @@ class Job {
             try {
                 Constructor<?> cons = config.getMapper().getConstructor(String.class, Context.class);
                 logger.log("Found map method...");
-                for(Parser parser: parsers) {
-                    for (ArrayList<String> chunk : parser.returnChunks()) {
+                for(InputReader inputReader : inputReaders) {
+                    for (ArrayList<String> chunk : inputReader.returnChunks()) {
                         mappers.add(new Mapper(chunk, cons)); //give each chunk to a different mapper with a new context
                     }
                 }
@@ -80,18 +78,21 @@ class Job {
             }
         }
     }
+
+    /**
+     * Takes the buffer from each Mapper and groups values for the same key.
+     */
     private void combine(){
         for (Mapper map : mappers) {
-            new Combine(map, combiners).combine();
+            new Combiner(map.getIntermediateOutput(), groupedKeys).combine();//pass intermediate keys and grouped key storage
         }
     }
     /**
-     * "The process of bringing intermediate output to a set
-     * of Reducers is known as the ‘shuffling’ process"
+     *
      */
     private void partition(){
-        for (Combiner c : combiners) {
-            reducers.add(new Reducer(c.getBuffer())); //give grouped intermediate key value pairs to reducer
+        for (GroupedValuesList groupedValuesList : groupedKeys) {
+            reducers.add(new Reducer(groupedValuesList.getBuffer())); //give grouped intermediate key value pairs to reducer
         }
     }
     /**
@@ -132,19 +133,11 @@ class Job {
      * This is the output, writes every key/value pair to file, this is the final step
      */
     @SuppressWarnings("unchecked")
-    private void OutputWriter(){
-        try {
-            logger.log("Writing to file...");
-            FileWriter fw = new FileWriter(new File(config.getOutputPath())); //get the stored output path
-            logger.log("Reduced set size: " + c.getMap().size());
-            for (Pair<Object, Object> objectEntry : c.getMap()) {
-                fw.write("Key: " + objectEntry.getKey() + " Value: " + objectEntry.getValue() + "\n");
-            }
-            fw.flush();
-            fw.close();
-        }catch(Exception e){
-            logger.logCritical("Cause: " + e.getCause() + " Message: " + e.getMessage());
-        }
+    private void output(){
+        OutputWriter out = new OutputWriter();
+        out.setFilepath(config.getOutputPath());
+        out.setContext(c);
+        out.write();
     }
     /**
      * This is the driver, performs all actions in order
@@ -152,14 +145,14 @@ class Job {
     void runJob(){
         setStartTime(System.currentTimeMillis());
 
-        parse(); //parse input data into chunks
+        reader(); //parse input data into chunks
         assignChunksToMappers(); //push everything into mapper array
         runMappers(); //run all mappers in mapper array
         combine();
         partition();//assign mappers IO to reducers
         runReducers();
         sendReducedToReduceMethod();
-        OutputWriter();
+        output();
 
         logger.log("Completed Job: " + "'" + config.getJobName() + "'" + " to "
                 + config.getOutputPath() + " in " + getElapsed()

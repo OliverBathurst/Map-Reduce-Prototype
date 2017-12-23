@@ -7,12 +7,12 @@ import java.util.ArrayList;
  * Written by Oliver Bathurst <oliverbathurst12345@gmail.com>
  */
 
-class Parser {
+class InputReader {
     private final ArrayList<ArrayList<String>> chunks = new ArrayList<>();
     private final String filepath;
     private final int CHUNK_SIZE; //default chunk size
 
-    Parser(String path, int size){
+    InputReader(String path, int size){
         this.filepath = path;
         this.CHUNK_SIZE = size;
     }
