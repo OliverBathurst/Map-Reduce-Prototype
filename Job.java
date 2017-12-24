@@ -86,11 +86,15 @@ class Job {
         }
     }
     /**
-     *
+     * Shuffling ensures that all of the values associated with a specific key go to the same reducer
+     * To do this, each (key, list(values)) pair produced from the combiner phase is given a unique reducer.
+     * Each reducer is initialised with a unique (key, list(values)) pair
+     * from the grouped values ArrayList, this ArrayList is populated in the Combiner phase,
+     * where values are grouped for the same key.
      */
-    private void partition(){
+    private void shuffle(){
         for (GroupedValuesList groupedValuesList : groupedValues) {
-            reducers.add(new Reducer(groupedValuesList.getList(), config)); //give grouped intermediate key value pairs to reducer
+            reducers.add(new Reducer(groupedValuesList.getPair(), config)); //give grouped intermediate key value pairs to reducer
         }
     }
     /**
@@ -118,7 +122,7 @@ class Job {
         out.setFilepath(config.getOutputPath());
         out.prepare();
         for(Reducer r: reducers){
-            out.setContext(r.getFinalKeyPairContext());
+            out.setContext(r.getReducedKeyPairs());
             out.write();
         }
         out.closeOutput();
@@ -133,7 +137,7 @@ class Job {
         assignChunksToMappers(); //push everything into mapper array
         runMappers(); //run all mappers in mapper array
         combine();
-        partition();//assign mappers IO to reducers
+        shuffle();//assign mappers IO to reducers
         runReducers();
         output();
 

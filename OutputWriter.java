@@ -25,7 +25,7 @@ class OutputWriter {
             if(file.exists()){
                 logger.log("Deleting existing file...");
                 if(!file.delete()){
-                    logger.logCritical("Error deleting existing file");
+                    logger.log("Error deleting existing file");
                 }
             }
             bw = new BufferedWriter(new FileWriter(new File(filepath)));
@@ -43,12 +43,13 @@ class OutputWriter {
     void write(){
         try {
             for (Pair<Object, Object> objectEntry : c.getMap()) {
-                bw.write("Key: " + String.valueOf(objectEntry.getKey()) + " Value: " + String.valueOf(objectEntry.getValue()));
+                bw.write("Key: " + objectEntry.getKey() + " Value: " + objectEntry.getValue());
                 bw.newLine();
             }
             bw.flush();
         }catch(Exception e){
             logger.logCritical("Cause: " + e.getCause() + " Message: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 }

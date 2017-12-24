@@ -17,7 +17,7 @@ class GroupedValuesList {
         groupedValues.getValue().add(pairValue);
     }
 
-    Pair<Object, ArrayList<Object>> getList(){
+    Pair<Object, ArrayList<Object>> getPair(){
         return groupedValues;
     }
 }

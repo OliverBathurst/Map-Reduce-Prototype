@@ -31,7 +31,7 @@ class Reducer {
                     "use config.setReducer(class);");
         }
     }
-    Context getFinalKeyPairContext(){
+    Context getReducedKeyPairs(){
         return finalContext;
     }
 }
