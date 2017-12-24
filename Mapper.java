@@ -10,25 +10,34 @@ import java.util.ArrayList;
 
 class Mapper {
     private final Context context = new Context();
+    private final Logger logger = new Logger();
     private final ArrayList<String> singleChunk;
-    private final Constructor<?> cons;
+    private final Config c;
 
-    Mapper(ArrayList<String> chunk, Constructor<?> constructor){
+    Mapper(ArrayList<String> chunk, Config config){
         this.singleChunk = chunk;
-        this.cons = constructor;
+        this.c = config;
     }
 
     ArrayList<Pair<Object, Object>> getIntermediateOutput(){
         return context.getMap();
     }
-
+    @SuppressWarnings("unchecked")
     void run(){
-        for(String chunk : singleChunk) {
-            try {
-                cons.newInstance(chunk, context);//Invoke the map method with each string (line) and the context
-            } catch (Exception e) {
-                e.printStackTrace();
+        if (c.getMapper() != null) {
+            for (String chunk : singleChunk) {
+                try {
+                    Constructor<?> cons = c.getMapper().getConstructor(String.class, Context.class);
+                    synchronized (this) { //only one thread should access at a time (not thread safe call)
+                        cons.newInstance(chunk, context);//Invoke the map method with each string (line) and the context
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
+        }else{
+            logger.logCritical("Mapper method 'map' not defined\n" +
+                    "use config.setMapper(class);");
         }
     }
 }

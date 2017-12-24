@@ -1,6 +1,4 @@
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by Oliver on 18/11/2017.
@@ -8,8 +6,8 @@ import java.util.Set;
  */
 
 class Main {
-    private static final ArrayList tempArrayList = new ArrayList<>();
-    private static final Set tempHashSet = new HashSet();
+    private static final List tempArrayList = new ArrayList<>();
+    private static final Set tempHashSet =  new HashSet();
     private static final StringBuilder flightConcat = new StringBuilder();
 
     public static void main(String[] args) {

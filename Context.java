@@ -16,7 +16,7 @@ class Context {
      * the pair list can be retrieved by calling (context obj).getMap();
      */
     void write(Object a, Object b){
-        mapped.add(new Pair<>(a,b));
+        mapped.add(new Pair<>(a, b));
     }
     /**
      * return the list of pairs

@@ -1,14 +1,11 @@
 import javafx.util.Pair;
-
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
+import java.io.*;
+import java.util.ArrayList;
 
 class OutputWriter {
+    private final ArrayList<Context> contexts = new ArrayList<>();
     private final Logger logger = new Logger();
-    private BufferedWriter bw;
     private String filepath;
-    private Context c;
 
     OutputWriter(){}
 
@@ -16,39 +13,33 @@ class OutputWriter {
         this.filepath = path;
     }
 
-    void setContext(Context context){
-        this.c = context;
+    void addContext(Context context){
+        contexts.add(context);
     }
-    void prepare(){
+    void write(){
         try {
             File file = new File(filepath);
             if(file.exists()){
                 logger.log("Deleting existing file...");
                 if(!file.delete()){
-                    logger.log("Error deleting existing file");
+                    logger.logCritical("Error deleting existing file");
                 }
             }
-            bw = new BufferedWriter(new FileWriter(new File(filepath)));
-        }catch(Exception e){
-            logger.logCritical("Cause: " + e.getCause() + " Message: " + e.getMessage());
-        }
-    }
-    void closeOutput(){
-        try {
-            bw.close();
-        }catch(Exception e){
-            logger.log("Cause: " + e.getCause() + " Message: " + e.getMessage());
-        }
-    }
-    void write(){
-        try {
-            for (Pair<Object, Object> objectEntry : c.getMap()) {
-                bw.write("Key: " + objectEntry.getKey() + " Value: " + objectEntry.getValue());
-                bw.newLine();
+            if(!file.exists()) {
+                file = new File(filepath);
+                if(!file.createNewFile()){
+                    logger.logCritical("Error creating file");
+                }
             }
-            bw.flush();
+            FileWriter fw = new FileWriter(file);
+            for(Context c: contexts) {
+                for (Pair<Object, Object> objectEntry : c.getMap()) {
+                    fw.write("Key: " + String.valueOf(objectEntry.getKey()) + " Value: " + String.valueOf(objectEntry.getValue()) + '\n');
+                    fw.flush();
+                }
+            }
+            fw.close();
         }catch(Exception e){
-            logger.logCritical("Cause: " + e.getCause() + " Message: " + e.getMessage());
             e.printStackTrace();
         }
     }

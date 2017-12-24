@@ -1,6 +1,6 @@
 import javafx.util.Pair;
 import java.lang.reflect.Constructor;
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Oliver on 18/11/2017.
@@ -8,12 +8,12 @@ import java.util.ArrayList;
  */
 
 class Reducer {
-    private final Pair<Object, ArrayList<Object>> keyListValue;
+    private final Pair<Object, List<Object>> keyListValue;
     private final Logger logger = new Logger();
     private final Context finalContext = new Context();
     private final Config c;
 
-    Reducer(Pair<Object, ArrayList<Object>> pair, Config config){
+    Reducer(Pair<Object, List<Object>> pair, Config config){
         this.keyListValue = pair;
         this.c = config;
     }
@@ -22,8 +22,11 @@ class Reducer {
         if (c.getReducer() != null) {
             try{
                 Constructor cons = c.getReducer().getConstructor(Object.class, Iterable.class, Context.class);
-                cons.newInstance(keyListValue.getKey(), keyListValue.getValue(), finalContext);
+                synchronized (this) {
+                    cons.newInstance(keyListValue.getKey(), keyListValue.getValue(), finalContext);
+                }
             }catch(Exception e){
+                e.printStackTrace();
                 logger.logCritical("Error: " + e.getMessage() + " cause: " + e.getCause());
             }
         } else {
@@ -31,7 +34,7 @@ class Reducer {
                     "use config.setReducer(class);");
         }
     }
-    Context getReducedKeyPairs(){
+    Context getFinalKeyPairs(){
         return finalContext;
     }
 }
