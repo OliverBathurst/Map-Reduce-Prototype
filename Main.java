@@ -12,8 +12,8 @@ class Main {
 
     public static void main(String[] args) {
         Config newConfig = new Config();
-        newConfig.setMapper(map.class);
-        newConfig.setReducer(reduce.class);
+        newConfig.setMapperClass(map.class);
+        newConfig.setReducerClass(reduce.class);
         newConfig.setTitle("Testing");
         newConfig.addInputPath(args[0]);
         newConfig.addInputPath(args[1]); //add as many input paths as you want

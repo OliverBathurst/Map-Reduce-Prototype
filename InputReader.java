@@ -50,7 +50,6 @@ class InputReader {
                 chunks.add(new ArrayList<>(tempStorage)); //create last chunk and add it
             }
             tempStorage.clear();
-
         }catch(Exception e){
             System.out.println("EXCEPTION: \n" + e.getMessage());
         }

@@ -4,14 +4,14 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Each GroupedByKeyList object stores a list of key-value pairs based on a key,
- * such that any given key 'k' will only exist in one GroupedByKeyList,
+ * Each CombinerOutput object stores a list of key-value pairs based on a key,
+ * such that any given key 'k' will only exist in one CombinerOutput,
  * this checking is done in the Combiner class.
  */
-class GroupedByKeyList {
+class CombinerOutput {
     private final Pair<Object, List<Object>> groupedValues;
 
-    GroupedByKeyList(Object key){
+    CombinerOutput(Object key){
         groupedValues = new Pair<>(key, Collections.synchronizedList(new ArrayList<>()));
     }
 

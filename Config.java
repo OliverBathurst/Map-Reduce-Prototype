@@ -18,10 +18,10 @@ class Config {
     boolean getMultiThreaded(){
         return multiThreaded;
     }
-    void setReducer(Class reducer){
+    void setReducerClass(Class reducer){
         reduce = reducer;
     }
-    void setMapper(Class mapper){
+    void setMapperClass(Class mapper){
         map = mapper;
     }
     @SuppressWarnings("SameParameterValue")
@@ -50,10 +50,10 @@ class Config {
     String getOutputPath(){
         return output;
     }
-    Class getReducer(){
+    Class getReducerClass(){
         return reduce;
     }
-    Class getMapper(){
+    Class getMapperClass(){
         return map;
     }
 }

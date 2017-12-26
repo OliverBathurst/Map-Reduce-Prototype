@@ -9,24 +9,23 @@ import java.util.List;
 
 class Reducer {
     private final Pair<Object, List<Object>> keyListValue;
-    private final Logger logger = new Logger();
     private final Context finalContext = new Context();
-    private final Config c;
+    private final Logger logger = new Logger();
+    private final Class c;
 
-    Reducer(Pair<Object, List<Object>> pair, Config config){
+    Reducer(Pair<Object, List<Object>> pair, Class reducerClass){
         this.keyListValue = pair;
-        this.c = config;
+        this.c = reducerClass;
     }
     @SuppressWarnings("unchecked")
     void reduce(){
-        if (c.getReducer() != null) {
+        if (c != null) {
             try{
-                Constructor cons = c.getReducer().getConstructor(Object.class, Iterable.class, Context.class);
+                Constructor cons = c.getConstructor(Object.class, Iterable.class, Context.class);
                 synchronized (this) {
                     cons.newInstance(keyListValue.getKey(), keyListValue.getValue(), finalContext);
                 }
             }catch(Exception e){
-                e.printStackTrace();
                 logger.logCritical("Error: " + e.getMessage() + " cause: " + e.getCause());
             }
         } else {

@@ -16,6 +16,7 @@ class OutputWriter {
     void addContext(Context context){
         contexts.add(context);
     }
+
     void write(){
         try {
             File file = new File(filepath);

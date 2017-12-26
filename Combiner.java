@@ -8,11 +8,11 @@ import java.util.ArrayList;
  */
 class Combiner {
     private final ArrayList<Pair<Object,Object>> intermediateOutput; //intermediate key-value pairs
-    private final ArrayList<GroupedByKeyList> groupedByKeyLists; //to store lists of key-value pairs
+    private final ArrayList<CombinerOutput> combinerOutputs; //to store lists of key-value pairs
 
-    Combiner(ArrayList<Pair<Object,Object>> iO, ArrayList<GroupedByKeyList> combinerList){
+    Combiner(ArrayList<Pair<Object,Object>> iO, ArrayList<CombinerOutput> combinerList){
         this.intermediateOutput = iO;
-        this.groupedByKeyLists = combinerList;
+        this.combinerOutputs = combinerList;
     }
     /**
      * Iterate over all intermediate key-value pairs from the mapper and pass the pair to the checking function
@@ -20,15 +20,15 @@ class Combiner {
     /**
      * Searches all the current GroupedValuesLists for the key,
      * if it exists in a list, add the key and its accompanying value to that list.
-     * Else, create a new GroupedByKeyList to store the key-value pairs for that key.
+     * Else, create a new CombinerOutput to store the key-value pairs for that key.
      * This ensures that there is a different list for each key.
      * The result of this function is many different lists, each containing a unique key and the associated values.
      */
     void combine(){
-        synchronized (groupedByKeyLists) {
-            for (Pair<Object, Object> anIntermediateOutput : intermediateOutput) {
-                boolean contains = false;
-                for (GroupedByKeyList c : groupedByKeyLists) {
+        for (Pair<Object, Object> anIntermediateOutput : intermediateOutput) {
+            boolean contains = false;
+            synchronized (combinerOutputs) {
+                for (CombinerOutput c : combinerOutputs) {
                     if (c.getKeyAndValuesPair().getKey().equals(anIntermediateOutput.getKey())) {
                         c.add(anIntermediateOutput.getValue());
                         contains = true;
@@ -36,7 +36,7 @@ class Combiner {
                     }
                 }
                 if (!contains) {
-                    groupedByKeyLists.add(new GroupedByKeyList(anIntermediateOutput.getKey()) {{
+                    combinerOutputs.add(new CombinerOutput(anIntermediateOutput.getKey()) {{
                         add(anIntermediateOutput.getValue());
                     }});
                 }
