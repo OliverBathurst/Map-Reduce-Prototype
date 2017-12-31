@@ -1,6 +1,4 @@
 import javafx.util.Pair;
-
-import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 
 /**
@@ -28,12 +26,9 @@ class Mapper {
         if (c != null) {
             for (String chunk : singleChunk) {
                 try {
-                    Constructor<?> cons = c.getConstructor(String.class, Context.class);
-                    synchronized (this) { //only one thread should access at a time (not thread safe call)
-                        cons.newInstance(chunk, context);//Invoke the map method with each string (line) and the context
-                    }
+                    c.getDeclaredConstructor(String.class, Context.class).newInstance(chunk, context);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    logger.logCritical("Error: " + e.getMessage() + " cause: " + e.getCause());
                 }
             }
         }else{

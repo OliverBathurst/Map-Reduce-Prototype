@@ -8,9 +8,10 @@ import java.util.concurrent.*;
 
 class Job {
     private ExecutorService service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-    private final ArrayList<CombinerOutput> groupedValues = new ArrayList<>();
+    private final ArrayList<CombinerOutput> groupedByKey = new ArrayList<>();
     private final ArrayList<InputReader> inputReaders = new ArrayList<>();
     private final ArrayList<Mapper> mappers = new ArrayList<>();
+    private final ArrayList<Sorter> sorters = new ArrayList<>();
     private final ArrayList<Reducer> reducers = new ArrayList<>();
     private final ArrayList<Combiner> combiners = new ArrayList<>();
     private final Logger logger = new Logger();
@@ -72,7 +73,18 @@ class Job {
     private void sort(){
         logger.log("Running Sort...");
         for (Mapper map : mappers) {
-            map.getIntermediateOutput().sort((o1, o2) -> o1.getKey().equals(o2.getKey()) ? 0 : 1);
+            sorters.add(new Sorter(map.getIntermediateOutput()));
+        }
+        if(config.getMultiThreaded()) {
+            setupThreadPool();
+            for(Sorter s: sorters){
+                service.execute(s::sort);
+            }
+            shutdownThreadPool();
+        }else{
+            for(Sorter s: sorters){
+                s.sort();
+            }
         }
     }
     /**
@@ -81,7 +93,7 @@ class Job {
      */
     private void combine(){
         for (Mapper map : mappers) {
-            combiners.add(new Combiner(map.getIntermediateOutput(), groupedValues));
+            combiners.add(new Combiner(map.getIntermediateOutput(), groupedByKey));
         }
         logger.log("Running Combiners...");
         if(config.getMultiThreaded()) {
@@ -106,7 +118,7 @@ class Job {
      */
     private void shuffle(){
         logger.log("Shuffling...");
-        for (CombinerOutput combinerOutput : groupedValues) {
+        for (CombinerOutput combinerOutput : groupedByKey) {
             reducers.add(new Reducer(combinerOutput.getKeyAndValuesPair(), config.getReducerClass())); //give grouped-by-key intermediate key-value pairs to reducer
         }
     }
@@ -115,8 +127,16 @@ class Job {
      */
     private void reduce(){
         logger.log("Reducing...");
-        for(Reducer r: reducers){
-            r.reduce();
+        if(config.getMultiThreaded()) {
+            setupThreadPool();
+            for(Reducer r : reducers){
+                service.execute(r::reduce);
+            }
+            shutdownThreadPool();
+        }else{
+            for(Reducer r : reducers) {
+                r.reduce();
+            }
         }
     }
     /**

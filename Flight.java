@@ -23,25 +23,29 @@ class Flight {
         this.flightTime = flightTime;
         this.depart = new Date(Long.parseLong(departureTime) * 1000);
     }
-    String getFlightID(){
+    private String getFlightID(){
         return flightID;
     }
     String getPassengerID(){
         return passengerID;
     }
-    String getFrom(){
+    private String getFrom(){
         return fromAirport;
     }
-    String getTo(){
+    private String getTo(){
         return toAirport;
     }
-    String getDepartTime(){
+    private String getDepartTime(){
         return form.format(depart);
     }
-    String getFlightTime(){
+    private String getFlightTime(){
         return flightTime;
     }
-    String getArrivalTime(){
+    private String getArrivalTime(){
         return form.format(new Date(depart.getTime() + (Integer.parseInt(flightTime) * 60000)));
+    }
+    String getDetails(){
+        return "\nFLIGHT ID: " + getFlightID() + "\nFROM: " + getFrom() + "\nTO: " + getTo() + "\nDEPARTURE TIME: " + getDepartTime()
+                + "\nFLIGHT TIME (M): " + getFlightTime() + "\nARRIVAL TIME: " + getArrivalTime() + "\nPASSENGER ID: " + getPassengerID() + "\n";
     }
 }

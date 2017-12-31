@@ -1,5 +1,4 @@
 import javafx.util.Pair;
-import java.lang.reflect.Constructor;
 import java.util.List;
 
 /**
@@ -21,10 +20,7 @@ class Reducer {
     void reduce(){
         if (c != null) {
             try{
-                Constructor cons = c.getConstructor(Object.class, Iterable.class, Context.class);
-                synchronized (this) {
-                    cons.newInstance(keyListValue.getKey(), keyListValue.getValue(), finalContext);
-                }
+                c.getDeclaredConstructor(Object.class, Iterable.class, Context.class).newInstance(keyListValue.getKey(), keyListValue.getValue(), finalContext);
             }catch(Exception e){
                 logger.logCritical("Error: " + e.getMessage() + " cause: " + e.getCause());
             }

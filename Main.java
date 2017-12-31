@@ -6,10 +6,6 @@ import java.util.*;
  */
 
 class Main {
-    private static final List tempArrayList = new ArrayList<>();
-    private static final Set tempHashSet =  new HashSet();
-    private static final StringBuilder flightConcat = new StringBuilder();
-
     public static void main(String[] args) {
         Config newConfig = new Config();
         newConfig.setMapperClass(map.class);
@@ -18,13 +14,11 @@ class Main {
         newConfig.addInputPath(args[0]);
         newConfig.addInputPath(args[1]); //add as many input paths as you want
         newConfig.addOutputPath(args[2]);
-        //newConfig.setChunkSize(256);//not really needed, alter based on file size
         newConfig.setMultiThreaded(true); //multithreading is slower in this instance
         new Job(newConfig).runJob();
     }
-    @SuppressWarnings({"WeakerAccess, Annotator"})
-    public static class map {
-        public map(String values, Context context) {
+    static class map {
+        map(String values, Context context) {
             String[] str = values.split(","); //split with comma (csv)
             if (str[0].matches("[A-Z]{3,20}") && str[1].matches("[A-Z]{3}") && str[2].matches("[0-9]{1,3}\\.[0-9]{3,13}") && str[3].matches("[0-9]{1,3}\\.[0-9]{3,13}")) {
                 context.write(str[1], new AirportData(str[0], str[2], str[3]));
@@ -35,39 +29,42 @@ class Main {
             }
         }
     }
-    @SuppressWarnings({"WeakerAccess", "Annotator", "unused", "unchecked"})
-    public static class reduce {
-        public reduce(Object key, Iterable<Object> values, Context context) {
-            
+    @SuppressWarnings("StringConcatenationInLoop")
+    static class reduce {
+        reduce(Object key, Iterable<Object> values, Context context) {
+
             if (key.toString().matches("[A-Z]{3}[0-9]{4}[A-Z]")) {
-                int passengers = 0;
-                flightConcat.setLength(0);
+                List<Object> uniquePassengers = new ArrayList<>();//this array list contains all unique passenger IDs for a flight
+                String flight = "";
 
                 for (Object val : values) {
                     if (val instanceof Flight) {
                         Flight flightData = (Flight) val;
-                        flightConcat.append("\n" + "FLIGHT ID: ").append(flightData.getFlightID()).append("\n").append("FROM: ").append(flightData.getFrom()).append("\n").append("TO: ").append(flightData.getTo()).append("\n").append("DEPARTURE TIME: ").append(flightData.getDepartTime()).append("\n").append("FLIGHT TIME (M): ").append(flightData.getFlightTime()).append("\n").append("ARRIVAL TIME: ").append(flightData.getArrivalTime()).append("\n").append("PASSENGER ID: ").append(flightData.getPassengerID()).append("\n");
-                        passengers++;
+                        if(!uniquePassengers.contains(flightData.getPassengerID())){ //if passenger ID hasn't been encountered yet
+                            uniquePassengers.add(flightData.getPassengerID());//add the passenger ID to the list as new
+                            flight += flightData.getDetails();//print flight details
+                        } //don't print flight details when there's a duplicate passenger ID
                     }
                 }
-                context.write(key, flightConcat.toString());
-                context.write(key, "Passengers: " + passengers);
+                context.write(key, flight);
+                context.write(key, "Passengers: " + uniquePassengers.size());
             }
 
             if (key.toString().matches("[A-Z]{3}")) {
-                tempArrayList.clear();
-                tempHashSet.clear();
+                List<Object> flightIDs = new ArrayList<>();
                 String airport = "";
+
                 for (Object val : values) {
                     if (val instanceof AirportData) {
                         AirportData airportInfo = (AirportData) val;
-                        airport = "AIRPORT NAME: " + airportInfo.getName() + "\n" + "AIRPORT LATITUDE: " + airportInfo.getLatitude() + "\n" + "AIRPORT LONGITUDE: " + airportInfo.getLongitude() + "\n";
-                    }else{
-                        tempArrayList.add(val);//it's a flight ID
+                        airport = "\nAIRPORT NAME: " + airportInfo.getName() + "\n" + "AIRPORT LATITUDE: " + airportInfo.getLatitude() + "\n" + "AIRPORT LONGITUDE: " + airportInfo.getLongitude() + "\n";
+                    }else{//it's a flight ID
+                        if(!flightIDs.contains(val)){
+                            flightIDs.add(val);
+                        }
                     }
                 }
-                tempHashSet.addAll(tempArrayList);
-                context.write(key, airport + "NO. OF FLIGHTS FROM AIRPORT: " + tempHashSet.size() + "\n");
+                context.write(key, airport + "NO. OF FLIGHTS FROM AIRPORT: " + flightIDs.size() + "\n");
             }
         }
     }

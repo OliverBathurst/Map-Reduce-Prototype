@@ -1,6 +1,5 @@
 import javafx.util.Pair;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -12,7 +11,7 @@ class CombinerOutput {
     private final Pair<Object, List<Object>> groupedValues;
 
     CombinerOutput(Object key){
-        groupedValues = new Pair<>(key, Collections.synchronizedList(new ArrayList<>()));
+        groupedValues = new Pair<>(key, new ArrayList<>());
     }
 
     synchronized void add(Object pairValue){
