@@ -4,11 +4,14 @@
  */
 
 /**
- * An AirportData object stores information about a given airport
+ * An AirportData object stores information about a given airport, including name, latitude, and longitude
  */
 class AirportData {
     private final String name, latitude, longitude;
 
+    /**
+     * An object must these three components
+     */
     AirportData(String name, String lat, String lon){
         this.name = name;
         this.latitude = lat;

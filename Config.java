@@ -5,13 +5,20 @@ import java.util.ArrayList;
  * Written by Oliver Bathurst <oliverbathurst12345@gmail.com>
  */
 
+/**
+ * Configuration class
+ * Used for setting up of variables used by the Job class
+ * Crucially, setting of the designated reducer and mapper class is needed
+ * for proper operation of the mapreducer (setReducerClass & setMapperClass)
+ * Other options include turning multithreading on/off, creating output/input paths
+ */
 class Config {
     private final ArrayList<String> inputFiles = new ArrayList<>();
-    private int CHUNK_SIZE = 128;
-    private boolean multiThreaded = false;
-    private Class reduce, map;
+    private boolean multiThreaded = false;//multithreaded disabled by default
+    private int CHUNK_SIZE = 256; //Determines when a new chunk should be created (in the input reader)
+    private Class reduce, map;//the reduce and map classes are explicitly declared by the user in the main method (setMapperClass etc.)
     private String jobName, output;
-    @SuppressWarnings("SameParameterValue")
+
     void setMultiThreaded(boolean b){
         multiThreaded = b;
     }

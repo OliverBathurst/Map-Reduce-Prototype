@@ -29,7 +29,6 @@ class Main {
             }
         }
     }
-    @SuppressWarnings("StringConcatenationInLoop")
     static class reduce {
         reduce(Object key, Iterable<Object> values, Context context) {
 

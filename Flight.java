@@ -1,4 +1,3 @@
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
@@ -12,16 +11,15 @@ import java.util.Date;
 @SuppressWarnings("unused")
 class Flight {
     private final String passengerID, fromAirport, toAirport, flightTime, flightID;
-    private final SimpleDateFormat form = new SimpleDateFormat("HH:MM:SS");
-    private final Date depart;
+    private final Long depart;
 
-    Flight(String flightID, String passID, String from, String to, String departureTime, String flightTime){
+    Flight(String flightID, String passengerID, String from, String to, String departureTime, String flightTime){
         this.flightID = flightID;
-        this.passengerID = passID;
+        this.passengerID = passengerID;
         this.fromAirport = from;
         this.toAirport = to;
         this.flightTime = flightTime;
-        this.depart = new Date(Long.parseLong(departureTime) * 1000);
+        this.depart = Long.parseLong(departureTime) * 1000L;//convert into epoch time (ms)
     }
     private String getFlightID(){
         return flightID;
@@ -36,13 +34,13 @@ class Flight {
         return toAirport;
     }
     private String getDepartTime(){
-        return form.format(depart);
+        return new Date(depart).toString();
     }
     private String getFlightTime(){
         return flightTime;
     }
     private String getArrivalTime(){
-        return form.format(new Date(depart.getTime() + (Integer.parseInt(flightTime) * 60000)));
+        return new Date(depart + (Long.parseLong(flightTime) * 60000L)).toString();
     }
     String getDetails(){
         return "\nFLIGHT ID: " + getFlightID() + "\nFROM: " + getFrom() + "\nTO: " + getTo() + "\nDEPARTURE TIME: " + getDepartTime()
