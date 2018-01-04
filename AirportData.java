@@ -17,13 +17,17 @@ class AirportData {
         this.latitude = lat;
         this.longitude = lon;
     }
-    String getName(){
+    private String getName(){
         return name;
     }
-    String getLatitude(){
+    private String getLatitude(){
         return latitude;
     }
-    String getLongitude(){
+    private String getLongitude(){
         return longitude;
+    }
+    String getDetails(){
+        return "\nAIRPORT NAME: " + getName() + "\n" + "AIRPORT LATITUDE: "
+                + getLatitude() + "\n" + "AIRPORT LONGITUDE: " + getLongitude() + "\n";
     }
 }

@@ -2,7 +2,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
- * This class writes the time of an event along with debug information
+ * This class prints the time of an event along with debug information
  * logCritical stops execution with an error code of 1
  */
 class Logger {

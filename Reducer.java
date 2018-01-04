@@ -10,17 +10,18 @@ class Reducer {
     private final Pair<Object, List<Object>> keyListValue;
     private final Context finalContext = new Context();
     private final Logger logger = new Logger();
-    private final Class c;
+    private final Class reducerClass;
 
     Reducer(Pair<Object, List<Object>> pair, Class reducerClass){
         this.keyListValue = pair;
-        this.c = reducerClass;
+        this.reducerClass = reducerClass;
     }
     @SuppressWarnings("unchecked")
     void reduce(){
-        if (c != null) {
+        if (reducerClass != null) {
             try{
-                c.getDeclaredConstructor(Object.class, Iterable.class, Context.class).newInstance(keyListValue.getKey(), keyListValue.getValue(), finalContext);
+                reducerClass.getDeclaredConstructor(Object.class, Iterable.class, Context.class)
+                        .newInstance(keyListValue.getKey(), keyListValue.getValue(), finalContext);
             }catch(Exception e){
                 logger.logCritical("Error: " + e.getMessage() + " cause: " + e.getCause());
             }

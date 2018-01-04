@@ -10,7 +10,7 @@ class Main {
         Config newConfig = new Config();
         newConfig.setMapperClass(map.class);
         newConfig.setReducerClass(reduce.class);
-        newConfig.setTitle("Testing");
+        newConfig.setTitle("AirportDataMapReduce");
         newConfig.addInputPath(args[0]);
         newConfig.addInputPath(args[1]); //add as many input paths as you want
         newConfig.addOutputPath(args[2]);
@@ -33,34 +33,30 @@ class Main {
         reduce(Object key, Iterable<Object> values, Context context) {
 
             if (key.toString().matches("[A-Z]{3}[0-9]{4}[A-Z]")) {
-                List<Object> uniquePassengers = new ArrayList<>();//this array list contains all unique passenger IDs for a flight
+                Set<Object> set = new HashSet<>();
                 String flight = "";
 
                 for (Object val : values) {
                     if (val instanceof Flight) {
                         Flight flightData = (Flight) val;
-                        if(!uniquePassengers.contains(flightData.getPassengerID())){ //if passenger ID hasn't been encountered yet
-                            uniquePassengers.add(flightData.getPassengerID());//add the passenger ID to the list as new
+                        if(!set.contains(flightData.getPassengerID())){ //if passenger ID hasn't been encountered yet
+                            set.add(flightData.getPassengerID());//add the passenger ID to the list as new
                             flight += flightData.getDetails();//print flight details
                         } //don't print flight details when there's a duplicate passenger ID
                     }
                 }
                 context.write(key, flight);
-                context.write(key, "Passengers: " + uniquePassengers.size());
+                context.write(key, "Passengers: " + set.size());
             }
 
             if (key.toString().matches("[A-Z]{3}")) {
-                List<Object> flightIDs = new ArrayList<>();
+                Set<Object> flightIDs = new HashSet<>();
                 String airport = "";
-
                 for (Object val : values) {
                     if (val instanceof AirportData) {
-                        AirportData airportInfo = (AirportData) val;
-                        airport = "\nAIRPORT NAME: " + airportInfo.getName() + "\n" + "AIRPORT LATITUDE: " + airportInfo.getLatitude() + "\n" + "AIRPORT LONGITUDE: " + airportInfo.getLongitude() + "\n";
+                        airport = ((AirportData) val).getDetails();
                     }else{//it's a flight ID
-                        if(!flightIDs.contains(val)){
-                            flightIDs.add(val);
-                        }
+                        flightIDs.add(val);
                     }
                 }
                 context.write(key, airport + "NO. OF FLIGHTS FROM AIRPORT: " + flightIDs.size() + "\n");
