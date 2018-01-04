@@ -1,7 +1,3 @@
-/**
- * Created by Oliver on 18/11/2017.
- * Written by Oliver Bathurst <oliverbathurst12345@gmail.com>
- */
 
 /**
  * An AirportData object stores information about a given airport, including name, latitude, and longitude

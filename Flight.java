@@ -2,11 +2,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
- * Created by Oliver on 18/11/2017.
- * Written by Oliver Bathurst <oliverbathurst12345@gmail.com>
- */
-
-/**
  * A Flight object stores information about a flight to be retrieved in the Reduce method
  */
 class Flight {

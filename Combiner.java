@@ -1,6 +1,5 @@
 import javafx.util.Pair;
 import java.util.ArrayList;
-
 /**
  * The combiner takes the buffer (intermediate key-value pairs) from a Mapper and groups the values for the same key.
  * This class creates a unique list for each key, such that any given list contains all of the associated

@@ -1,22 +1,21 @@
 import java.util.*;
 
-/**
- * Created by Oliver on 18/11/2017.
- * Written by Oliver Bathurst <oliverbathurst12345@gmail.com>
- */
-
 class Main {
     public static void main(String[] args) {
-        Config newConfig = new Config();
-        newConfig.setMapperClass(map.class);
+        Config newConfig = new Config();//create new config object
+        newConfig.setMapperClass(map.class);//setup map and reduce classes
         newConfig.setReducerClass(reduce.class);
-        newConfig.setTitle("AirportDataMapReduce");
+        newConfig.setTitle("AirportDataMapReduce");//set job name
         newConfig.addInputPath(args[0]);
         newConfig.addInputPath(args[1]); //add as many input paths as you want
-        newConfig.addOutputPath(args[2]);
+        newConfig.addOutputPath(args[2]);//set output path
         newConfig.setMultiThreaded(true); //multithreading is slower in this instance
-        new Job(newConfig).runJob();
+        new Job(newConfig).runJob();//pass config to job and run job
     }
+
+    /**
+     * The map method, takes a line of input and a context to write to
+     */
     static class map {
         map(String values, Context context) {
             String[] str = values.split(","); //split with comma (csv)
@@ -29,6 +28,10 @@ class Main {
             }
         }
     }
+
+    /**
+     * The reduce method, takes a key with a list of associated values, and a context to write to
+     */
     static class reduce {
         reduce(Object key, Iterable<Object> values, Context context) {
 
@@ -41,7 +44,7 @@ class Main {
                         Flight flightData = (Flight) val;
                         if(!set.contains(flightData.getPassengerID())){ //if passenger ID hasn't been encountered yet
                             set.add(flightData.getPassengerID());//add the passenger ID to the list as new
-                            flight += flightData.getDetails();//print flight details
+                            flight += flightData.getDetails();//print flight details containing new passenger ID
                         } //don't print flight details when there's a duplicate passenger ID
                     }
                 }

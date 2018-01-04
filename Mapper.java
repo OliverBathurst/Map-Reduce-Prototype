@@ -2,11 +2,6 @@ import javafx.util.Pair;
 import java.util.ArrayList;
 
 /**
- * Created by Oliver on 18/11/2017.
- * Written by Oliver Bathurst <oliverbathurst12345@gmail.com>
- */
-
-/**
  * The mapper class takes a chunk of input (lines)
  */
 class Mapper {

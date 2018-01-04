@@ -1,6 +1,5 @@
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
 /**
  * This class prints the time of an event along with debug information
  * logCritical stops execution with an error code of 1

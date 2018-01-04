@@ -1,7 +1,6 @@
 import javafx.util.Pair;
 import java.util.ArrayList;
 import java.util.List;
-
 /**
  * Each CombinerOutput object stores a list of values for a particular key,
  * such that any given key 'k' will only exist in one CombinerOutput object,

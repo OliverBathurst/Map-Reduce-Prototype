@@ -3,11 +3,6 @@ import java.io.FileReader;
 import java.util.ArrayList;
 
 /**
- * Created by Oliver on 18/11/2017.
- * Written by Oliver Bathurst <oliverbathurst12345@gmail.com>
- */
-
-/**
  * The input reader class reads in a single file, the input is split into chunks,
  * the chunk size is configurable by the user.
  */

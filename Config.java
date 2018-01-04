@@ -1,11 +1,6 @@
 import java.util.ArrayList;
 
 /**
- * Created by Oliver on 18/11/2017.
- * Written by Oliver Bathurst <oliverbathurst12345@gmail.com>
- */
-
-/**
  * Configuration class
  * Used for setting up of variables used by the Job class
  * Crucially, setting of the designated reducer and mapper class is needed
