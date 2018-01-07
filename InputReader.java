@@ -52,7 +52,7 @@ class InputReader {
             if (tempStorage.size() > 0){ //if there's any lines left in the last chunk
                 chunks.add(new ArrayList<>(tempStorage)); //add it to the chunks list
             }
-            tempStorage.clear();
+            tempStorage.clear();//clear the array
         }catch(Exception e){
             System.out.println("EXCEPTION: \n" + e.getMessage());
         }

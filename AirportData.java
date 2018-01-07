@@ -6,7 +6,7 @@ class AirportData {
     private final String name, latitude, longitude;
 
     /**
-     * An object must these three components
+     * An object must these three components, name, latitude, and longitude
      */
     AirportData(String name, String lat, String lon){
         this.name = name;
@@ -22,6 +22,10 @@ class AirportData {
     private String getLongitude(){
         return longitude;
     }
+
+    /**
+     * Return details as a string
+     */
     String getDetails(){
         return "\nAIRPORT NAME: " + getName() + "\n" + "AIRPORT LATITUDE: "
                 + getLatitude() + "\n" + "AIRPORT LONGITUDE: " + getLongitude() + "\n";

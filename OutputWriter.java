@@ -46,8 +46,8 @@ class OutputWriter {
             FileWriter fw = new FileWriter(file);//create new file writer
             for(Context c: contexts) {//iterate over all contexts
                 for (Pair<Object, Object> keyValuePairs : c.getMap()) {//iterate over all key-value pairs within the context
-                    fw.write("Key: " + String.valueOf(keyValuePairs.getKey()) + " Value: " + String.valueOf(keyValuePairs.getValue()) + '\n');//write the values
-                    fw.flush();//flush to disk
+                    fw.write("Key: " + String.valueOf(keyValuePairs.getKey()) + " Value: " + String.valueOf(keyValuePairs.getValue()) + '\n');//write the key and value
+                    fw.flush();//flush to file
                 }
             }
             fw.close();//close and finish

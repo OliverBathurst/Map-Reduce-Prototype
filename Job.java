@@ -17,7 +17,7 @@ class Job {
      * Job is initialised with a configuration object which holds all information for proper operation
      */
     Job(Config conf){
-        this.config = conf;//setup the configuration
+        this.config = conf;//setup the configuration obj
     }
 
     /**
@@ -25,18 +25,18 @@ class Job {
      */
     private void reader(){
         for(String filepath: config.getInputPaths()) { //get input files
-            inputReaders.add(new InputReader(filepath, config.getChunkSize()));
+            inputReaders.add(new InputReader(filepath, config.getChunkSize()));//add a new input reader for each file path
         }
         logger.log("Running Input Reader...");
         if(config.getMultiThreaded()) {
             setupThreadPool();
             for (InputReader p : inputReaders) {
-                service.execute(p::run);
+                service.execute(p::run);//run in parallel
             }
             shutdownThreadPool();
         }else{
             for (InputReader p : inputReaders) {
-                p.run(); //run the inputReaders
+                p.run(); //run the inputReaders sequentially
             }
         }
     }
@@ -55,12 +55,12 @@ class Job {
         if(config.getMultiThreaded()) {
             setupThreadPool();
             for(Mapper map: mappers){
-                service.execute(map::run);
+                service.execute(map::run);//run mappers parallel
             }
             shutdownThreadPool();
         }else{
             for(Mapper map: mappers){
-                map.run();
+                map.run();//run sequentially
             }
         }
     }
@@ -72,12 +72,12 @@ class Job {
     private void sort(){
         logger.log("Running Sort...");
         for (Mapper map : mappers) {//create a sorter for each mapper's intermediate output (list of key-value pairs)
-            sorters.add(new Sorter(map.getIntermediateOutput()));
+            sorters.add(new Sorter(map.getIntermediateOutput()));//add a new sorter with the map's intermediate output
         }
-        if(config.getMultiThreaded()) {//run in parallel if required by the user
+        if(config.getMultiThreaded()) {//run in parallel if requested by the user
             setupThreadPool();
             for(Sorter s: sorters){
-                service.execute(s::sort);
+                service.execute(s::sort);//run in parallel
             }
             shutdownThreadPool();
         }else{//else run sequentially
@@ -92,7 +92,7 @@ class Job {
      */
     private void combine(){
         for (Mapper map : mappers) {//create a new combiner for each mapper
-            combiners.add(new Combiner(map.getIntermediateOutput(), groupedByKey));//initialise combiner with the mapper's intermediate output and storage for grouping
+            combiners.add(new Combiner(map.getIntermediateOutput(), groupedByKey));//initialise new combiner obj with the mapper's intermediate output and storage for grouping
         }
         logger.log("Running Combiners...");
         if(config.getMultiThreaded()) {
@@ -118,11 +118,11 @@ class Job {
     private void shuffle(){
         logger.log("Shuffling...");
         for (CombinerOutput combinerOutput : groupedByKey) {//assign each reducer a key (list) values pair and the reducer class to call
-            reducers.add(new Reducer(combinerOutput.getKeyAndValuesPair(), config.getReducerClass())); //give grouped-by-key intermediate key-value pairs to reducer
+            reducers.add(new Reducer(combinerOutput.getKeyAndValuesPair(), config.getReducerClass())); //give grouped-by-key (key, (list)value) pairs to reducer
         }
     }
     /**
-     * runs all reducers
+     * Runs all reducers
      */
     private void reduce(){
         logger.log("Reducing...");
@@ -146,7 +146,7 @@ class Job {
         OutputWriter out = new OutputWriter();//create new object
         out.setFilepath(config.getOutputPath());//setup output path
         for(Reducer r: reducers){//iterate over all reducers
-            out.addContext(r.getFinalKeyPairs());//add each context to the writer
+            out.addContext(r.getFinalKeyPairs());//add the context from the reducer to the writer
         }
         logger.log("Writing to disk...");
         out.write();//call write method
@@ -159,27 +159,27 @@ class Job {
         reader(); //parse input data into chunks
         map(); //run all mappers in mapper array
         sort();//sort intermediate output
-        combine();
+        combine();//combine all key, value pairs to (key, (list)values) based on key
         shuffle();//assign mappers IO to reducers
-        reduce();
-        output();
+        reduce();//reduce
+        output();//write to file
         logger.log("Completed Job: " + "'" + config.getJobName() + "'" + " to "
                 + config.getOutputPath() + " in " + getElapsed()
-                + "ms");
+                + "ms");//print execution time message
     }
 
     /**
-     * setup the thread pool if the executor service is shut down
+     * setup the thread pool if the executor service (thread pool) is shut down
      */
     private void setupThreadPool(){
         if(service.isShutdown()){
-            service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+            service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());//create new
         }
     }
 
     /**
      * shutdown the thread pool, this ensures that, after this method has completed, all tasks have completed
-     * and the mapreduce process can continue
+     * and the process can continue (this method waits for the thread pool to complete all tasks assigned to it)
      */
     private void shutdownThreadPool() {
         service.shutdown();

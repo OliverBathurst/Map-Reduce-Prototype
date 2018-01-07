@@ -2,10 +2,11 @@ import java.util.ArrayList;
 
 /**
  * Configuration class
- * Used for setting up of variables used by the Job class
+ * Config object is used for encapsulating values used by the Job class
+ * A config object is required to be created and passed to a job for the map reduce job to work
  * Crucially, setting of the designated reducer and mapper class is needed
- * for proper operation of the mapreducer (setReducerClass & setMapperClass)
- * Other options include turning multithreading on/off, creating output/input paths
+ * for proper operation of the map reducer (setReducerClass & setMapperClass)
+ * Other options include turning multithreading on/off, creating output/input paths, setting title of job
  */
 class Config {
     private final ArrayList<String> inputFiles = new ArrayList<>();
@@ -14,6 +15,7 @@ class Config {
     private Class reduce, map;//the reduce and map classes are explicitly declared by the user in the main method (setMapperClass etc.)
     private String jobName, output;
 
+    @SuppressWarnings("SameParameterValue")
     void setMultiThreaded(boolean b){
         multiThreaded = b;
     }

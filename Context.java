@@ -18,7 +18,7 @@ class Context {
         mapped.add(new Pair<>(a, b));//add to the list
     }
     /**
-     * return the list of pairs
+     * return the list of pairs from the context
      */
     ArrayList<Pair<Object, Object>> getMap(){return mapped;}//return the list
 }

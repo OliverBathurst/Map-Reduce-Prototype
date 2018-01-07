@@ -37,10 +37,10 @@ class Mapper {
                 try {
                     mapperClass.getDeclaredConstructor(String.class, Context.class).newInstance(line, context);//create new instance of map() with line and context
                 } catch (Exception e) {
-                    logger.logCritical("Error: " + e.getMessage() + " cause: " + e.getCause());
+                    logger.logCritical("Error: " + e.getMessage() + " cause: " + e.getCause());//log error and stop program
                 }
             }
-        }else{
+        }else{//print error is mapper class not set
             logger.logCritical("Mapper method 'map' not defined\n" +
                     "use config.setMapper(class);");
         }

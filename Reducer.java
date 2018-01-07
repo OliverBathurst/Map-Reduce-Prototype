@@ -29,11 +29,11 @@ class Reducer {
                 reducerClass.getDeclaredConstructor(Object.class, Iterable.class, Context.class)
                         .newInstance(keyListValue.getKey(), keyListValue.getValue(), context);//get the reduce() constructor and create new instance of class with the required parameters
             }catch(Exception e){
-                logger.logCritical("Error: " + e.getMessage() + " cause: " + e.getCause());
+                logger.logCritical("Error: " + e.getMessage() + " cause: " + e.getCause());//log error and quit
             }
         } else {
             logger.logCritical("Reducer method 'reduce' not defined\n" +
-                    "use config.setReducer(class);"); //print informative message
+                    "use config.setReducer(class);"); //print informative message, reducer class not set
         }
     }
 
