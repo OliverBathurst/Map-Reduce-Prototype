@@ -6,6 +6,7 @@ class Main {
         newConfig.setMapperClass(map.class);//setup map and reduce classes
         newConfig.setReducerClass(reduce.class);
         newConfig.setTitle("AirportDataMapReduce");//set job name
+        newConfig.setNumReduceTasks(5);
         newConfig.addInputPath(args[0]);
         newConfig.addInputPath(args[1]); //add as many input paths as you want
         newConfig.addOutputPath(args[2]);//set output path

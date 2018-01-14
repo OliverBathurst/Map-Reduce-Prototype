@@ -107,22 +107,38 @@ class Job {
             }
         }
     }
+
     /**
-     * Shuffling ensures that all of the values associated with a specific key go to the same reducer
-     * To do this, each (key, list(values)) pair produced from the combiner phase is given a unique reducer.
-     * Each reducer is initialised with a unique (key, list(values)) pair
-     * from the grouped values ArrayList, this ArrayList is populated in the Combiner phase,
-     * where values are grouped for the same key.
-     *  "Each unique key output from the mappers should be assigned to a unique reducer."
+     * This method simply creates the number of reduce tasks set by the user (setNumReduceTasks(int n))
      */
-    private void shuffle(){
-        logger.log("Shuffling...");
-        for (CombinerOutput combinerOutput : groupedByKey) {//assign each reducer a key (list) values pair and the reducer class to call
-            reducers.add(new Reducer(combinerOutput.getKeyAndValuesPair(), config.getReducerClass())); //give grouped-by-key (key, (list)value) pairs to reducer
+    private void createReducers(){
+        for(int i = 0; i < config.numReduceTasks(); i++){
+            reducers.add(new Reducer(config.getReducerClass()));//create the number of reduce tasks needed (set by user, default is 1 task)
         }
     }
     /**
-     * Runs all reducers
+     * Partitioner calculates which reducer a key and list of values should be assigned to.
+     * This is a replication of Hadoop's HashPartitioner
+     */
+    private int partitioner(Object key){
+        return (key.hashCode() & Integer.MAX_VALUE) % config.numReduceTasks();
+    }
+    /**
+     * Shuffling ensures that all of the values associated with a specific key go to the same reducer
+     * To do this, each (key, list(values)) pair produced from the combiner phase is given to an reducer based on the partitioner's returned number
+     * which uses a hash calculation on the key.
+     * Each reducer is given (key, list(values)) pairs from the grouped values ArrayList, this ArrayList is populated in the Combiner phase,
+     * where values are grouped for the same key.
+     */
+    private void shuffle(){
+        logger.log("Shuffling...");
+        for (CombinerOutput combinerOutput : groupedByKey) {//iterate over all saved (key, list(values)) pairs
+            reducers.get(partitioner(combinerOutput.getKeyAndValuesPair().getKey()))
+                    .addKeyListValues(combinerOutput.getKeyAndValuesPair()); //get the reducer number from partitioner and add grouped-by-key (key, (list)value) pair to that reducer
+        }
+    }
+    /**
+     * Runs the reducers
      */
     private void reduce(){
         logger.log("Reducing...");
@@ -160,6 +176,7 @@ class Job {
         map(); //run all mappers in mapper array
         sort();//sort intermediate output
         combine();//combine all key, value pairs to (key, (list)values) based on key
+        createReducers();
         shuffle();//assign mappers IO to reducers
         reduce();//reduce
         output();//write to file
