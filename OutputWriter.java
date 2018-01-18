@@ -43,6 +43,7 @@ class OutputWriter {
                     logger.logCritical("Error creating file");//critical error
                 }
             }
+            logger.log("Writing to disk...");
             FileWriter fw = new FileWriter(file);//create new file writer
             for(Context c: contexts) {//iterate over all contexts
                 for (Pair<Object, Object> keyValuePairs : c.getMap()) {//iterate over all key-value pairs within the context

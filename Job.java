@@ -164,7 +164,6 @@ class Job {
         for(Reducer r: reducers){//iterate over all reducers
             out.addContext(r.getFinalKeyPairs());//add the context from the reducer to the writer
         }
-        logger.log("Writing to disk...");
         out.write();//call write method
     }
     /**
