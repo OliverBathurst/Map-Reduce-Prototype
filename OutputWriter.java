@@ -52,7 +52,7 @@ class OutputWriter {
             }
             fw.close();//close and finish
         }catch(Exception e){
-            e.printStackTrace();
+            logger.logCritical("Error while writing to file: " + e.getMessage());
         }
     }
 }
