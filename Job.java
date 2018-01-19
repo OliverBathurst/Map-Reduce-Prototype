@@ -132,9 +132,11 @@ class Job {
      */
     private void shuffle(){
         logger.log("Shuffling...");
-        for (CombinerOutput combinerOutput : groupedByKey) {//iterate over all saved (key, list(values)) pairs
-            reducers.get(partitioner(combinerOutput.getKey()))
-                    .addKeyListValues(combinerOutput.getKeyAndValuesPair()); //get the reducer number from partitioner and add grouped-by-key (key, (list)value) pair to that reducer
+        if(config.numReduceTasks() > 0) {//check to prevent / 0 errors in partitioner
+            for (CombinerOutput combinerOutput : groupedByKey) {//iterate over all saved (key, list(values)) pairs
+                reducers.get(partitioner(combinerOutput.getKey()))
+                        .addKeyListValues(combinerOutput.getKeyAndValuesPair()); //get the reducer number from partitioner and add grouped-by-key (key, (list)value) pair to that reducer
+            }
         }
     }
     /**
