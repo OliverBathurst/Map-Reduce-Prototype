@@ -10,7 +10,7 @@ class Main {
         newConfig.addInputPath(args[0]);
         newConfig.addInputPath(args[1]); //add as many input paths as you want
         newConfig.addOutputPath(args[2]);//set output path
-        newConfig.setMultiThreaded(true); //multithreading is slower in this instance
+        newConfig.setMultiThreaded(false); //multithreading is slower in this instance
         new Job(newConfig).runJob();//pass config to job and run job
     }
 
