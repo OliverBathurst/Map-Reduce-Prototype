@@ -11,7 +11,7 @@ import java.util.ArrayList;
 class Config {
     private final ArrayList<String> inputFiles = new ArrayList<>();
     private boolean multiThreaded = false;//multithreaded disabled by default
-    private int CHUNK_SIZE = 256, numReducers = 1; //Determines when a new chunk should be created (in the input reader)
+    private int CHUNK_SIZE = 256, numReducers = 1; //Determines when a new chunk should be created (in the input reader), number of reduce objects to create
     private Class reduce, map;//the reduce and map classes are explicitly declared by the user in the main method (setMapperClass etc.)
     private String jobName, output;
 
