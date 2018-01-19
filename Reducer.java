@@ -25,7 +25,7 @@ class Reducer {
 
     /**
      * This method creates a new instance of the reduce() class (and subsequently invokes the constructor)
-     * with the key, list of values for that key, and a context to write to.
+     * with a key, list of values for that key, and the context to write they key-value pairs to.
      */
     @SuppressWarnings("unchecked")
     void reduce(){
